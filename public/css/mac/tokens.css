@@ -1,0 +1,26 @@
+/* Mac Aqua Design Tokens */
+:root {
+    /* Aqua Gradients */
+    --aqua-blue-gradient: linear-gradient(to bottom,
+            #B8D4F1 0%,
+            #A5C8E8 50%,
+            #8AB7DB 100%);
+
+    /* Mac Colors */
+    --aqua-window-bg: #EDEDED;
+    --aqua-metal: linear-gradient(to bottom,
+            #E8E8E8 0%,
+            #D0D0D0 50%,
+            #E0E0E0 100%);
+
+    /* Typography */
+    --mac-font: 'Lucida Grande', 'Helvetica Neue', Arial, sans-serif;
+
+    /* Shadows */
+    --mac-window-shadow:
+        0 10px 30px rgba(0, 0, 0, 0.4),
+        0 5px 10px rgba(0, 0, 0, 0.3);
+
+    /* Highlights */
+    --aqua-highlight: rgba(255, 255, 255, 0.6);
+}

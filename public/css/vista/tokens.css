@@ -1,0 +1,23 @@
+/* Vista Design Tokens */
+:root {
+    /* Vista Glass Effect */
+    --vista-glass-bg: rgba(255, 255, 255, 0.9);
+    --vista-glass-blur: blur(20px);
+
+    /* Vista Colors */
+    --vista-blue: #4580C4;
+    --vista-blue-light: #68A3D8;
+    --vista-inactive: #A0A0A0;
+
+    /* Typography */
+    --vista-font: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+
+    /* Shadows */
+    --vista-window-shadow:
+        0 8px 16px rgba(0, 0, 0, 0.3),
+        0 4px 6px rgba(0, 0, 0, 0.2);
+
+    /* Borders */
+    --vista-border-active: 1px solid var(--vista-blue);
+    --vista-border-inactive: 1px solid var(--vista-inactive);
+}
