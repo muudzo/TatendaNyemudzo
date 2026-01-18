@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -16,11 +17,16 @@
     <link rel="stylesheet" href="public/css/mac/window.css">
     <link rel="stylesheet" href="public/css/mac/components.css">
 </head>
+
 <body>
     <!-- OS Selector Screen (shown first) -->
     <div id="os-selector" class="os-selector">
         <canvas id="starfield" class="starfield-canvas"></canvas>
         <div class="selector-container">
+            <div class="welcome-message">
+                <p class="welcome-text">Welcome to Tatenda Nyemudzo's Portfolio</p>
+                <p class="welcome-subtitle">Interactive Operating System Experience</p>
+            </div>
             <h1 class="selector-title">Choose Your Experience</h1>
             <div class="os-options">
                 <div class="os-option" data-os="vista" tabindex="0" role="button" aria-label="Select Windows Vista">
@@ -46,7 +52,7 @@
             </div>
             <p class="boot-text">Starting Windows Vista...</p>
         </div>
-        
+
         <!-- Mac Boot -->
         <div id="mac-boot" class="boot-screen hidden">
             <div class="mac-boot-logo"></div>
@@ -103,4 +109,5 @@
     <script src="public/js/apps/chess.js"></script>
     <script src="public/js/main.js"></script>
 </body>
+
 </html>
