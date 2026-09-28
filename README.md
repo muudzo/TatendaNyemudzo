@@ -23,6 +23,16 @@ sitemap are absolute:
 SITE_URL=https://example.com npm run build
 ```
 
+## Deploy (Cloudflare Pages)
+
+```bash
+SITE_URL=https://tatenda-nyemudzo.pages.dev npm run build
+npx wrangler pages deploy dist --project-name tatenda-nyemudzo --branch main
+```
+
+Response headers live in `public/_headers`. When a custom domain is connected, change `SITE_URL`
+to it and redeploy.
+
 ## Where things live
 
 | Path | What |
