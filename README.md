@@ -23,15 +23,18 @@ sitemap are absolute:
 SITE_URL=https://example.com npm run build
 ```
 
-## Deploy (Cloudflare Pages)
+## Deploy (Cloudflare Workers static assets)
+
+Live at https://tatenda-nyemudzo.kariba-starlight.workers.dev
 
 ```bash
-SITE_URL=https://tatenda-nyemudzo.pages.dev npm run build
-npx wrangler pages deploy dist --project-name tatenda-nyemudzo --branch main
+SITE_URL=https://tatenda-nyemudzo.kariba-starlight.workers.dev npm run build
+npx wrangler deploy                      # uses wrangler.jsonc, uploads dist/
+BASE_URL=https://tatenda-nyemudzo.kariba-starlight.workers.dev npm run test:e2e -- tests/e2e/site.spec.ts
 ```
 
 Response headers live in `public/_headers`. When a custom domain is connected, change `SITE_URL`
-to it and redeploy.
+to it, rebuild and redeploy.
 
 ## Where things live
 

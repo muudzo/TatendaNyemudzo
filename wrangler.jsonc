@@ -1,0 +1,11 @@
+// Cloudflare Workers static assets: serves the Astro build in dist/ with no Worker code.
+{
+  "name": "tatenda-nyemudzo",
+  "compatibility_date": "2026-09-26",
+  "assets": {
+    "directory": "./dist",
+    // Astro writes /about/index.html; serve it at /about/ and redirect /about to /about/.
+    "html_handling": "auto-trailing-slash",
+    "not_found_handling": "404-page"
+  }
+}
