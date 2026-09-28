@@ -1,0 +1,45 @@
+---
+/**
+ * A status stamp, like the ones on a council form. Live is solid; everything else is outlined,
+ * because it's still in progress.
+ */
+import { STATUS_LABEL, type Status } from '../../lib/work';
+
+interface Props {
+  status: Status;
+}
+
+const { status } = Astro.props;
+---
+
+<span class:list={['stamp', `stamp--${status}`]}>
+  <span class="visually-hidden">Status: </span>{STATUS_LABEL[status]}
+</span>
+
+<style>
+  .stamp {
+    display: inline-block;
+    padding: 0.2rem 0.5rem 0.15rem;
+    border: 1.5px solid var(--stamp);
+    border-radius: var(--radius);
+    font-family: var(--font-label);
+    font-size: 0.6875rem;
+    font-weight: 650;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--stamp);
+    transform: rotate(-1.5deg);
+    max-width: 100%;
+    line-height: 1.35;
+  }
+
+  .stamp--live {
+    background: var(--stamp);
+    color: var(--paper);
+  }
+
+  .stamp--architecture,
+  .stamp--mvp {
+    border-style: dashed;
+  }
+</style>

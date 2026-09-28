@@ -1,0 +1,91 @@
+---
+/**
+ * A horizontal bar chart drawn in SVG (attributes, not inline styles, so the CSP stays strict).
+ * The same rows render as a table for screen readers and for the power-off view.
+ */
+import Plate from './Plate.astro';
+
+interface Row {
+  label: string;
+  value: number;
+  display?: string;
+  highlight?: boolean;
+}
+
+interface Props {
+  label: string;
+  caption: string;
+  unit: string;
+  rows: Row[];
+}
+
+const { label, caption, unit, rows } = Astro.props;
+const max = Math.max(...rows.map((row) => row.value));
+const ROW_HEIGHT = 34;
+const LABEL_WIDTH = 120;
+const CHART_WIDTH = 560;
+const VALUE_GUTTER = 70;
+const barSpace = CHART_WIDTH - LABEL_WIDTH - VALUE_GUTTER;
+const height = rows.length * ROW_HEIGHT;
+---
+
+<Plate label={label} caption={caption}>
+  <svg
+    class="bars"
+    viewBox={`0 0 ${CHART_WIDTH} ${height}`}
+    width={CHART_WIDTH}
+    height={height}
+    role="presentation"
+  >
+    {
+      rows.map((row, index) => {
+        const y = index * ROW_HEIGHT;
+        const width = Math.max(2, (row.value / max) * barSpace);
+        return (
+          <g class:list={['bar', { 'bar--highlight': row.highlight }]}>
+            <text x="0" y={y + 21} class="bar-label">{row.label}</text>
+            <rect x={LABEL_WIDTH} y={y + 8} width={width} height="18" />
+            <text x={LABEL_WIDTH + width + 8} y={y + 21} class="bar-value">
+              {row.display ?? `${row.value} ${unit}`}
+            </text>
+          </g>
+        );
+      })
+    }
+  </svg>
+  <table slot="text">
+    <thead><tr><th scope="col">Item</th><th scope="col">{unit}</th></tr></thead>
+    <tbody>
+      {rows.map((row) => <tr><th scope="row">{row.label}</th><td>{row.display ?? row.value}</td></tr>)}
+    </tbody>
+  </table>
+</Plate>
+
+<style>
+  .bars {
+    width: 100%;
+    max-width: 40rem;
+    height: auto;
+    font-family: var(--font-label);
+    font-size: 13px;
+  }
+
+  .bar rect {
+    fill: var(--ink-faint);
+  }
+
+  .bar-label,
+  .bar-value {
+    fill: var(--ink);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .bar--highlight rect {
+    fill: var(--stamp);
+  }
+
+  .bar--highlight .bar-label,
+  .bar--highlight .bar-value {
+    font-weight: 650;
+  }
+</style>

@@ -1,0 +1,78 @@
+---
+/**
+ * The 19 March 2026 auction: the highest bid card was 45, in a room of roughly 200.
+ * Bidders are spread through the room with a fixed seed so the drawing is stable between builds.
+ */
+const COLUMNS = 25;
+const ROWS = 8;
+const BIDDERS = 45;
+const GAP = 16;
+const R = 4.5;
+
+function seededOrder(count: number, seed: number): number[] {
+  let state = seed;
+  const next = () => {
+    state = (state * 1664525 + 1013904223) % 4294967296;
+    return state / 4294967296;
+  };
+  return Array.from({ length: count }, (_, i) => ({ i, k: next() }))
+    .sort((a, b) => a.k - b.k)
+    .map(({ i }) => i);
+}
+
+const total = COLUMNS * ROWS;
+const bidders = new Set(seededOrder(total, 19032026).slice(0, BIDDERS));
+const seats = Array.from({ length: total }, (_, i) => ({
+  cx: (i % COLUMNS) * GAP + GAP / 2,
+  cy: Math.floor(i / COLUMNS) * GAP + GAP / 2,
+  bidder: bidders.has(i),
+  delay: bidders.has(i) ? [...bidders].indexOf(i) % 9 : 0,
+}));
+const width = COLUMNS * GAP;
+const height = ROWS * GAP;
+---
+
+<svg class="room" viewBox={`0 0 ${width} ${height}`} width={width} height={height}>
+  {
+    seats.map((seat) =>
+      seat.bidder ? (
+        <circle class:list={['seat', 'seat--bidder', `d${seat.delay}`]} cx={seat.cx} cy={seat.cy} r={R} />
+      ) : (
+        <circle class="seat" cx={seat.cx} cy={seat.cy} r={R - 0.5} />
+      ),
+    )
+  }
+</svg>
+
+<style>
+  .room {
+    width: 100%;
+    height: auto;
+  }
+
+  .seat {
+    fill: none;
+    stroke: var(--ink-faint);
+    stroke-width: 1;
+  }
+
+  .seat--bidder {
+    fill: var(--ink);
+    stroke: none;
+    transition: fill var(--duration-normal) ease;
+  }
+
+  /* When the entry is hovered or focused, the bidders are stamped one after another. */
+  :global(.work-feature:is(:hover, :focus-within)) .seat--bidder {
+    fill: var(--stamp);
+  }
+
+  .d1 { transition-delay: 30ms; }
+  .d2 { transition-delay: 60ms; }
+  .d3 { transition-delay: 90ms; }
+  .d4 { transition-delay: 120ms; }
+  .d5 { transition-delay: 150ms; }
+  .d6 { transition-delay: 180ms; }
+  .d7 { transition-delay: 210ms; }
+  .d8 { transition-delay: 240ms; }
+</style>

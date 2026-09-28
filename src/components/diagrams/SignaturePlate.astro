@@ -1,0 +1,46 @@
+---
+/**
+ * Each flagship has one signature plate: a drawing of a real number from the project.
+ * Used on the homepage and at the relevant point in the case study, so the two never drift.
+ */
+import Plate from '../case/Plate.astro';
+import AuctionRoom from './AuctionRoom.astro';
+import StageGate from './StageGate.astro';
+import RaceCondition from './RaceCondition.astro';
+
+interface Props {
+  slug: 'zimlivestock' | 'vaka' | 'investment-gamified';
+}
+
+const PLATES = {
+  zimlivestock: {
+    Visual: AuctionRoom,
+    label: 'Field note · 19 March 2026',
+    caption:
+      'The highest bid card in the room was 45. Everyone else, easily 150 more, was watching. A marketplace doesn’t need the room. It needs about 45 serious bidders.',
+    text: 'At a physical livestock auction on 19 March 2026, the highest bid card number was 45, so at most 30–50 people were actually bidding. At least 150 more attended as spectators. Conclusion: ZimLivestock needs roughly 45 serious bidders per auction, not a full room.',
+  },
+  vaka: {
+    Visual: StageGate,
+    label: 'The gate · 5 stages',
+    caption:
+      'A stage unlocks only after the one before it is paid on Paynow and passed by an inspector on site. The sequence stops being a paper rule and becomes something the system enforces.',
+    text: 'Five inspection stages in order: Foundation, DPC/slab, Drainage, Superstructure, Final. Each moves through LOCKED, AWAITING_PAYMENT, PAID_AWAITING_INSPECTION, BOOKED, then INSPECTED_PASS or INSPECTED_FAIL. Only a pass unlocks the next stage. Shown here mid-build: two stages passed, Drainage paid and awaiting inspection, two locked.',
+  },
+  'investment-gamified': {
+    Visual: RaceCondition,
+    label: 'Refactor 01 · the double spend',
+    caption:
+      'Two $600 buys against a $1,000 balance. Before: both read $1,000 and both succeed. After: the second waits for a row lock, sees $400, and is refused.',
+    text: 'Before the refactor, two concurrent $600 purchases against a $1,000 balance could both read $1,000 and both succeed, leaving −$200. After adding row-level locks (lockForUpdate), the second purchase waits, reads the updated $400 balance, and is rejected. A concurrency test asserts exactly one succeeds.',
+  },
+} as const;
+
+const { slug } = Astro.props;
+const { Visual, label, caption, text } = PLATES[slug];
+---
+
+<Plate label={label} caption={caption}>
+  <Visual />
+  <p slot="text">{text}</p>
+</Plate>

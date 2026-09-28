@@ -11,6 +11,10 @@ export default defineConfig({
   trailingSlash: 'always',
   integrations: [mdx(), sitemap({ filter: (page) => !page.includes('/v1/') })],
   security: { csp: true },
-  build: { inlineStylesheets: 'auto' },
+  // External stylesheets only: covered by 'self' in the CSP (inlined MDX component styles can miss
+  // the hash list) and cached by the service worker for offline reading.
+  build: { inlineStylesheets: 'never' },
   prefetch: false,
+  // No code blocks in the content, and Shiki's inline styles would break the strict CSP.
+  markdown: { syntaxHighlight: false },
 });

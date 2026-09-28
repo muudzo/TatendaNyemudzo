@@ -1,0 +1,61 @@
+---
+title: BIGMAMA$
+tier: supporting
+order: 2
+summary: A civic reporting app for people exposing illegal land deals, built for cheap phones, metered data and hostile networks.
+claim: A whistleblower’s phone can fail. Their safety can’t. Every technical choice follows from that sentence.
+role: Threat modelling, product design, full-stack build
+period: April 2026
+year: 2026
+context: Civic technology, land rights
+status: live
+stack: [React, Vite, PWA, WebCrypto, Cloudflare Workers, D1, KV]
+primitives: [offline-first, idempotency, honest-scope, fail-closed]
+facts:
+  - { value: 'AES-256', label: 'GCM, in the browser, before sending' }
+  - { value: '300 KB', label: 'bundle budget, enforced in CI' }
+  - { value: '1', label: 'control wipes everything on the device' }
+links:
+  - { label: 'Live app', href: 'https://bigmama-liard.vercel.app' }
+  - { label: 'Repository', href: 'https://github.com/muudzo/BIGMAMA-' }
+---
+
+import Note from '../../components/case/Note.astro';
+
+## Context
+
+People who report land-rights abuses in Zimbabwe are often watched. The people they report on can
+compel data from hosting providers, seize devices, and watch network traffic. The app is for
+citizens, activists and NGOs organising around illegal land deals.
+
+## Decisions
+
+I started with a threat model rather than a feature list: who the adversaries are, what they can
+do, and, just as important, **what this app cannot protect against**.
+
+<Note kind="decision">
+  The UI is forbidden from saying "military-grade encryption". The allowed wording is written
+  down: *"Reports are encrypted in your browser with AES-GCM-256 before sending."*
+</Note>
+
+Honest copy is a safety feature. Someone who overestimates their protection takes risks they
+wouldn't otherwise take. The residual risks are listed for users too: network timing, a
+compromised device, photo metadata, legal compulsion.
+
+## Build
+
+- **Real cryptography.** The first version had "simulated AES". I replaced it with WebCrypto
+  AES-GCM-256 using PBKDF2 (250,000 iterations).
+- **Exactly-once reporting.** Submissions carry idempotency keys, retry with a circuit breaker, and
+  queue offline, so a flaky connection never loses a report or sends it twice.
+- **Emergency wipe.** One control clears local storage, IndexedDB, caches and the service worker.
+- **Nothing sensitive cached.** The service worker never caches `/api/`, and the error boundary
+  never logs report contents.
+- **A small bundle.** A 300 KB gzip budget is enforced in CI, because on metered data size
+  decides who can use the app at all.
+
+## Where it stands
+
+Live as a PWA with CI security scanning (CodeQL, npm audit, gitleaks). The biggest open item is
+removing photo metadata on the device before upload, because EXIF data can identify a reporter
+even when everything else is anonymous.

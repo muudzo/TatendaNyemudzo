@@ -1,0 +1,278 @@
+---
+import Base from '../layouts/Base.astro';
+import { TRAJECTORY } from '../data/trajectory';
+import { SITE } from '../data/site';
+
+const PRINCIPLES = [
+  {
+    title: 'Go and look.',
+    body: 'An afternoon in a cattle auction told me more than a month of assumptions would have. I read the by-law before designing the form.',
+  },
+  {
+    title: 'Design the rule, then the screen.',
+    body: '“Bids have one door.” “A stage unlocks only when it’s paid and passed.” If the rule is right and enforced, the interface can stay simple.',
+  },
+  {
+    title: 'Assume it runs twice.',
+    body: 'Double-taps, retries, two requests at the same time. Money and records should come out right anyway.',
+  },
+  {
+    title: 'Say what it can’t do.',
+    body: 'Kill criteria, non-goals, residual risks. Someone who overestimates a system takes risks they shouldn’t.',
+  },
+  {
+    title: 'Write it down.',
+    body: 'Decision records, research dossiers, handovers that list what’s still red. The next person, often me, needs to know why.',
+  },
+];
+---
+
+<Base
+  title="About"
+  description="Tatenda Nyemudzo: design student at NHL Stenden, engineer by habit, building for the conditions most software ignores."
+>
+  <div class="page about">
+    <header class="about-head">
+      <p class="label">About</p>
+      <h1 class="about-title">
+        I study communication and multimedia design. I spend most of my time making software that has to
+        survive bad conditions.
+      </h1>
+    </header>
+
+    <section class="about-intro" aria-label="Introduction">
+      <div class="about-text">
+        <p>
+          I'm Tatenda Nyemudzo, a Communication &amp; Multimedia Design student at NHL Stenden in
+          Leeuwarden, on the NHL Stenden Excellency Scholarship. My course taught me to start with
+          people and how they read a screen. Building things taught me the other half: most interfaces
+          fail somewhere their designers never looked.
+        </p>
+        <p>
+          Most of what I build is for Zimbabwe. Mobile money is the norm, the power is scheduled, and a
+          paper receipt is easy to fake. Those conditions make every design decision honest. You can't
+          hide a weak system behind a good-looking screen when the network drops in the middle of a
+          payment.
+        </p>
+        <p>
+          I don't think of myself as a designer who codes or a developer with taste. Most interesting
+          problems don't respect that line. The auction deposit was a design problem and a database
+          constraint. The inspection gate was a service-design decision and a state machine.
+        </p>
+      </div>
+      <aside class="about-card" aria-label="In brief">
+        <dl>
+          <div><dt class="label">Studying</dt><dd>Communication &amp; Multimedia Design, NHL Stenden</dd></div>
+          <div><dt class="label">Recognition</dt><dd>NHL Stenden Excellency Scholarship</dd></div>
+          <div><dt class="label">Experience</dt><dd>Paynow, internship, March–April 2026</dd></div>
+          <div><dt class="label">Based in</dt><dd>{SITE.location}</dd></div>
+          <div><dt class="label">Tools</dt><dd>Figma, TypeScript, React, Laravel, NestJS, FastAPI, Postgres</dd></div>
+        </dl>
+      </aside>
+    </section>
+
+    <section class="about-section" aria-labelledby="principles-heading">
+      <div class="section-head">
+        <h2 id="principles-heading">How I work</h2>
+        <span class="label">Five habits, visible in the work</span>
+      </div>
+      <ol class="principles">
+        {
+          PRINCIPLES.map((principle, index) => (
+            <li>
+              <span class="numeral principle-index">{String(index + 1).padStart(2, '0')}</span>
+              <h3>{principle.title}</h3>
+              <p>{principle.body}</p>
+            </li>
+          ))
+        }
+      </ol>
+    </section>
+
+    <section class="about-section about-ai" aria-labelledby="ai-heading">
+      <div class="section-head">
+        <h2 id="ai-heading">On building with AI</h2>
+        <span class="label">Honest about the tools</span>
+      </div>
+      <div class="about-text">
+        <p>
+          I build with AI coding agents every day, and I won't pretend otherwise. What I've learned is
+          that the valuable work sits around the agent: deciding what to build, writing the constraints it
+          works inside, reviewing what comes back, and noticing when it's confidently wrong. My
+          projects keep a written contract (a <code>CLAUDE.md</code> with the domain glossary, security
+          checklist and non-negotiables) for exactly that reason.
+        </p>
+        <p>
+          I got curious enough about where agents fail that I built <a
+            href="https://github.com/tatenda-source/agenteval">AgentEval</a
+          >, a small framework that scores agents on cost and correctness together.
+        </p>
+      </div>
+    </section>
+
+    <section class="about-section" aria-labelledby="path-heading">
+      <div class="section-head">
+        <h2 id="path-heading">The path so far</h2>
+        <span class="label">Dated from my repositories</span>
+      </div>
+      <ol class="path">
+        {
+          TRAJECTORY.map((step) => (
+            <li>
+              <span class="path-when label">{step.when}</span>
+              <p class="path-shift">
+                {step.href ? <a href={step.href}>{step.shift}</a> : step.shift}
+              </p>
+              <p class="path-evidence">{step.evidence}</p>
+            </li>
+          ))
+        }
+      </ol>
+    </section>
+
+    <section class="about-section" aria-labelledby="elsewhere-heading">
+      <div class="section-head">
+        <h2 id="elsewhere-heading">Away from the screen</h2>
+      </div>
+      <div class="about-text">
+        <p>
+          Not everything I build is for work. Pac-Man and chess ended up playable inside the first
+          version of this site, and there's a Rubik's cube project and a snake game in my repositories.
+          I also make small things in code for people I care about, the kind of project that only ever
+          has one user.
+        </p>
+      </div>
+    </section>
+  </div>
+</Base>
+
+<style>
+  .about-head {
+    display: grid;
+    gap: var(--space-4);
+    padding-block: clamp(2.5rem, 1.5rem + 4vw, 5rem) var(--space-12);
+  }
+
+  .about-title {
+    font-size: clamp(2rem, 1.4rem + 2.6vw, 3.5rem);
+    font-weight: 380;
+    line-height: 1.06;
+    letter-spacing: -0.025em;
+    max-width: 22ch;
+  }
+
+  .about-intro {
+    display: grid;
+    gap: var(--space-12);
+  }
+
+  .about-text {
+    max-width: var(--measure);
+  }
+
+  .about-card dl {
+    margin: 0;
+    border-top: 1px solid var(--ink);
+  }
+
+  .about-card div {
+    display: grid;
+    gap: var(--space-1);
+    padding-block: var(--space-3);
+    border-bottom: var(--hairline);
+  }
+
+  .about-card dd {
+    margin: 0;
+    font-family: var(--font-label);
+    font-size: var(--text-small);
+    line-height: 1.45;
+  }
+
+  .about-section {
+    margin-top: var(--space-section);
+  }
+
+  .principles {
+    display: grid;
+    gap: var(--space-8) var(--space-12);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .principles li {
+    display: grid;
+    gap: var(--space-2);
+  }
+
+  .principle-index {
+    font-size: var(--text-small);
+    color: var(--stamp);
+  }
+
+  .principles h3 {
+    font-size: var(--text-title);
+    font-weight: 400;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+  }
+
+  .principles p {
+    font-family: var(--font-label);
+    font-size: var(--text-small);
+    line-height: 1.5;
+    color: var(--ink-soft);
+    max-width: 30rem;
+  }
+
+  .path {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .path li {
+    display: grid;
+    gap: var(--space-1) var(--space-6);
+    padding-block: var(--space-4);
+    border-top: var(--hairline);
+  }
+
+  .path li:first-child {
+    border-top: 0;
+  }
+
+  .path-shift {
+    font-size: var(--text-lead);
+    line-height: 1.25;
+  }
+
+  .path-evidence {
+    font-family: var(--font-label);
+    font-size: var(--text-small);
+    color: var(--ink-soft);
+    max-width: 38rem;
+  }
+
+  @media (min-width: 64rem) {
+    .about-intro {
+      grid-template-columns: minmax(0, var(--measure)) minmax(0, 22rem);
+      justify-content: space-between;
+      align-items: start;
+    }
+
+    .principles {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .principles li:first-child {
+      grid-column: 1 / -1;
+    }
+
+    .path li {
+      grid-template-columns: 11rem minmax(0, 20rem) minmax(0, 1fr);
+      align-items: baseline;
+    }
+  }
+</style>

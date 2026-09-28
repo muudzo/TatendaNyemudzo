@@ -1,0 +1,54 @@
+---
+title: MooMetrics
+tier: supporting
+order: 3
+summary: Farm animal records for low-connectivity farms, with death reports that can't be quietly faked.
+claim: On a farm, a dead animal is an insurance claim. The record has to be as hard to fake as it is easy to make.
+role: Product design, full-stack build
+period: July 2026
+year: 2026
+context: Agritech, multi-farm record keeping
+status: prototype
+stack: [React 18, TypeScript, FastAPI, SQLAlchemy 2, PostgreSQL, IndexedDB]
+primitives: [offline-first, audit-log, fail-closed, idempotency]
+facts:
+  - { value: '≥85%', label: 'backend test coverage, enforced' }
+  - { value: 'SHA-256', label: 'duplicate photo detection per farm' }
+  - { value: '45', label: 'backend tests, run on every push' }
+links:
+  - { label: 'Repository', href: 'https://github.com/tatenda-source/moometrics' }
+---
+
+import Note from '../../components/case/Note.astro';
+
+## Context
+
+Farm workers record animals and deaths out in the field, where the signal is weak or absent.
+Managers need records they can rely on: for their herd, for audits, and for insurance.
+
+## Decisions
+
+<Note kind="decision">
+  A death report requires a photo, and the same photo can't be used twice. Images are hashed with
+  SHA-256 on the device and checked for duplicates within each farm.
+</Note>
+
+Reusing an old photo is the cheapest way to fake a loss, so it's the first route to close.
+Each animal can have only one death record, which can't be changed, and its status moves to
+`dead` automatically.
+
+Everything is scoped to a farm. A manager has full control and the audit log; an employee records
+animals and reports deaths for their own farm only.
+
+## Build
+
+Writes made offline go into an IndexedDB queue and sync automatically on reconnect, with the
+photo hash already computed. Short-lived access tokens are held in memory, refresh tokens in
+httpOnly cookies, and there's an account lockout and timing-safe login. In production the server
+refuses to start with weak secrets, SQLite, or the default admin password. CI runs tests, linting,
+bandit, pip-audit, npm audit and CodeQL.
+
+## Where it stands
+
+A deployable prototype with a one-command Render blueprint and a runbook for backup and restore.
+Next it needs a real farm to use it for a season.

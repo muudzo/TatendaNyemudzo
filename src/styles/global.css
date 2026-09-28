@@ -176,10 +176,21 @@ hr {
   letter-spacing: 0.02em;
 }
 
+/* A section head already draws the top rule for the first item under it. */
+.section-head + * {
+  border-top: 0 !important;
+  padding-top: 0;
+}
+
 /* ——— Power off: every visual has a written twin ——— */
 
 .plate-text {
-  display: none;
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 
 :root[data-power='off'] .plate-visual {
@@ -187,7 +198,58 @@ hr {
 }
 
 :root[data-power='off'] .plate-text {
-  display: block;
+  position: static;
+  width: auto;
+  height: auto;
+  overflow: visible;
+  clip-path: none;
+  white-space: normal;
+}
+
+/* The power cut itself: the old view browns out, the new one comes up. Only on the toggle. */
+@keyframes brown-out {
+  0% {
+    opacity: 1;
+    filter: brightness(1);
+  }
+  35% {
+    opacity: 1;
+    filter: brightness(0.55);
+  }
+  100% {
+    opacity: 0;
+    filter: brightness(0.4);
+  }
+}
+
+@keyframes come-up {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+html.power-cutting::view-transition-old(root) {
+  animation: brown-out 420ms ease-in both;
+}
+
+html.power-cutting::view-transition-new(root) {
+  animation: come-up 260ms 240ms ease-out both;
+}
+
+html.power-restoring::view-transition-old(root) {
+  animation: come-up 300ms ease-out reverse both;
+}
+
+html.power-restoring::view-transition-new(root) {
+  animation: come-up 420ms 80ms var(--ease-out-expo) both;
+}
+
+html.power-cutting::view-transition-group(masthead),
+html.power-restoring::view-transition-group(masthead) {
+  animation-duration: 0s;
 }
 
 @media (prefers-reduced-motion: reduce) {

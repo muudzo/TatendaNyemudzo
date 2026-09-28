@@ -1,0 +1,71 @@
+---
+/**
+ * A margin note. On wide screens it sits beside the paragraph it annotates; on narrow ones it
+ * sits inline. The kind is the only place the stamp colour appears in running text.
+ */
+interface Props {
+  kind: 'decision' | 'rejected' | 'evidence' | 'open';
+}
+
+const LABEL: Record<Props['kind'], string> = {
+  decision: 'Decision',
+  rejected: 'Rejected',
+  evidence: 'Evidence',
+  open: 'Still open',
+};
+
+const { kind } = Astro.props;
+---
+
+<aside class:list={['note', `note--${kind}`]}>
+  <span class="note-kind label">{LABEL[kind]}</span>
+  <div class="note-body"><slot /></div>
+</aside>
+
+<style>
+  .note {
+    margin: var(--space-6) 0;
+    padding: var(--space-3) 0 var(--space-3) var(--space-4);
+    border-left: 2px solid var(--rule-strong);
+    font-family: var(--font-label);
+    font-size: var(--text-small);
+    line-height: 1.5;
+    color: var(--ink-soft);
+  }
+
+  .note-kind {
+    display: block;
+    margin-bottom: var(--space-1);
+    color: var(--ink);
+  }
+
+  .note--decision {
+    border-left-color: var(--stamp);
+  }
+
+  .note--decision .note-kind {
+    color: var(--stamp);
+  }
+
+  .note--rejected .note-kind {
+    text-decoration: line-through;
+    text-decoration-thickness: 1.5px;
+  }
+
+  .note--open {
+    border-left-style: dashed;
+  }
+
+  .note-body :global(p + p) {
+    margin-top: 0.5em;
+  }
+
+  @media (min-width: 72rem) {
+    .note {
+      float: right;
+      clear: right;
+      width: var(--margin-col);
+      margin: 0.35rem calc(-1 * (var(--margin-col) + var(--space-12))) var(--space-4) 0;
+    }
+  }
+</style>

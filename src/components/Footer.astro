@@ -1,0 +1,81 @@
+---
+import { SITE } from '../data/site';
+const year = new Date().getFullYear();
+---
+
+<footer class="site-footer">
+  <div class="page footer-inner">
+    <section class="footer-contact" aria-labelledby="contact-heading">
+      <h2 id="contact-heading" class="label">Contact</h2>
+      <p class="footer-invite">
+        If you're working on something that has to keep going when conditions are bad, I'd like to hear
+        about it.
+      </p>
+      <p><a class="footer-email" href={`mailto:${SITE.email}`}>{SITE.email}</a></p>
+    </section>
+    <ul class="footer-links" aria-label="Elsewhere">
+      {SITE.links.map((link) => <li><a href={link.href} rel="me">{link.label}</a></li>)}
+      <li><a href="/this-site/">How this site is built</a></li>
+      <li><a href="/v1/">Portfolio v1 (retired)</a></li>
+    </ul>
+    <p class="footer-fine label">
+      © {year} {SITE.name} · {SITE.location} · Readable offline, and with the power off
+    </p>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    margin-top: var(--space-section);
+    border-top: 1px solid var(--ink);
+    padding-block: var(--space-12) var(--space-8);
+  }
+
+  .footer-inner {
+    display: grid;
+    gap: var(--space-8);
+  }
+
+  .footer-contact {
+    display: grid;
+    gap: var(--space-3);
+    max-width: 36rem;
+  }
+
+  .footer-invite {
+    font-size: var(--text-lead);
+    line-height: var(--leading-snug);
+  }
+
+  .footer-email {
+    font-size: var(--text-lead);
+    font-style: italic;
+    overflow-wrap: anywhere;
+  }
+
+  .footer-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2) var(--space-6);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-family: var(--font-label);
+    font-size: var(--text-small);
+  }
+
+  .footer-fine {
+    color: var(--ink-faint);
+  }
+
+  @media (min-width: 60rem) {
+    .footer-inner {
+      grid-template-columns: 1fr auto;
+      align-items: end;
+    }
+
+    .footer-fine {
+      grid-column: 1 / -1;
+    }
+  }
+</style>

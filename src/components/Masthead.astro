@@ -1,0 +1,135 @@
+---
+import PowerSwitch from './PowerSwitch.astro';
+import { NAV, SITE } from '../data/site';
+
+const path = Astro.url.pathname;
+const isCurrent = (href: string) => href !== '/#work' && path.startsWith(href);
+---
+
+<header class="masthead">
+  <div class="page masthead-inner">
+    <a class="wordmark" href="/" aria-label={`${SITE.name}, home`}>
+      <span class="wordmark-name">Tatenda Nyemudzo</span>
+      <span class="wordmark-role label">{SITE.role}</span>
+    </a>
+    <nav aria-label="Main">
+      <ul>
+        {
+          NAV.map((item) => (
+            <li>
+              <a href={item.href} aria-current={isCurrent(item.href) ? 'page' : undefined}>
+                {item.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+    <PowerSwitch />
+  </div>
+  <div class="power-strip" id="power-strip" role="status" aria-live="polite" hidden>
+    <p class="page"></p>
+  </div>
+  <div class="network-strip" id="network-strip" role="status" aria-live="polite" hidden>
+    <p class="page"></p>
+  </div>
+</header>
+
+<style>
+  .masthead {
+    border-bottom: var(--hairline);
+    view-transition-name: masthead;
+  }
+
+  .masthead-inner {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-template-areas:
+      'mark power'
+      'nav nav';
+    align-items: center;
+    gap: var(--space-3) var(--space-6);
+    padding-block: var(--space-4);
+  }
+
+  .wordmark {
+    grid-area: mark;
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+    text-decoration: none;
+    width: fit-content;
+  }
+
+  .wordmark-name {
+    font-size: 1.3rem;
+    font-weight: 500;
+    font-style: italic;
+    letter-spacing: -0.01em;
+    line-height: 1;
+  }
+
+  .wordmark-role {
+    font-size: 0.6875rem;
+  }
+
+  nav {
+    grid-area: nav;
+  }
+
+  nav ul {
+    display: flex;
+    gap: var(--space-6);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  nav a {
+    position: relative;
+    font-family: var(--font-label);
+    font-size: var(--text-small);
+    font-weight: 500;
+    text-decoration: none;
+    padding-block: var(--space-2);
+  }
+
+  nav a::after {
+    content: '';
+    position: absolute;
+    inset: auto 0 0.2rem 0;
+    height: 1px;
+    background: var(--stamp);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform var(--duration-normal) var(--ease-out-expo);
+  }
+
+  nav a:hover::after,
+  nav a[aria-current='page']::after {
+    transform: scaleX(1);
+  }
+
+  .power-strip,
+  .network-strip {
+    border-top: var(--hairline);
+    background: var(--paper-deep);
+    font-family: var(--font-label);
+    font-size: var(--text-small);
+    line-height: 1.45;
+  }
+
+  .power-strip p,
+  .network-strip p {
+    padding-block: var(--space-3);
+    max-width: var(--page-max);
+  }
+
+  @media (min-width: 48rem) {
+    .masthead-inner {
+      grid-template-columns: 1fr auto auto;
+      grid-template-areas: 'mark nav power';
+      gap: var(--space-8);
+    }
+  }
+</style>

@@ -1,0 +1,156 @@
+---
+import Base from '../layouts/Base.astro';
+import Note from '../components/case/Note.astro';
+import '../styles/prose.css';
+---
+
+<Base
+  title="This site"
+  description="Why the first version of this portfolio was retired, and how this one is built: a power switch, offline reading, a strict CSP, and about 5 KB of JavaScript."
+>
+  <article class="page colophon">
+    <header class="colophon-head">
+      <p class="label">This site</p>
+      <h1 class="colophon-title">The portfolio is a case study too.</h1>
+      <p class="colophon-lead">
+        If I say I design for failure conditions, the site should work under them. Here's what I
+        changed, and why.
+      </p>
+    </header>
+
+    <div class="prose colophon-body">
+      <h2 id="what-died">What I retired</h2>
+      <p>
+        The first version was <a href="/v1/">Nostalgia OS</a>: choose Windows Vista or Mac OS X, watch it
+        boot, then open desktop windows to find the work. It had a real window manager and an event bus,
+        and I was proud of the engineering.
+      </p>
+      <p>It also got in the way of everything that mattered:</p>
+      <ul>
+        <li>The work sat behind a choice, a boot sequence and at least three clicks.</li>
+        <li>It borrowed Microsoft's and Apple's design languages instead of showing mine.</li>
+        <li>It was barely usable on a phone, and search engines saw an empty page.</li>
+        <li>It said "I'm nostalgic", when my work is about infrastructure that doesn't exist yet.</li>
+      </ul>
+      <Note kind="decision">
+        Keep the one good idea from v1: the site itself should prove something. Retire the rest.
+      </Note>
+      <p>It's still online and playable, because deleting it would hide the iteration.</p>
+
+      <h2 id="idea">The idea</h2>
+      <p>
+        My projects share a way of working more than a stack: design for the moment things go wrong,
+        write down what you decided, and make the important rules impossible to break. So this site is a
+        working ledger: paper, ink, and one vermilion stamp that only marks decisions, status and where
+        you are. Nothing is decorative.
+      </p>
+
+      <h2 id="power">The power switch</h2>
+      <p>
+        In Zimbabwe, load-shedding (scheduled power cuts) is a design constraint. My systems are built
+        for it, so this site has a <strong>Power</strong> switch in the header. Turn it off and:
+      </p>
+      <ul>
+        <li>Web fonts, colour and motion drop away.</li>
+        <li>Every diagram is replaced by its written version, the same text screen readers always get.</li>
+        <li>
+          The page measures itself with the browser's Resource Timing data and tells you how much of it you
+          actually needed to read it.
+        </li>
+      </ul>
+      <p>
+        If your browser sends <code>Save-Data</code>, the site starts with the power off and says why. With
+        the power off, fonts are never requested at all: even the preload is decided before first paint.
+      </p>
+      <p>
+        Separately, a service worker keeps every page you open, and quietly saves the pages it links to when
+        your browser is idle. Lose your connection and the site keeps working. That part isn't a
+        simulation.
+      </p>
+
+      <h2 id="budgets">Budgets, measured</h2>
+      <table>
+        <thead>
+          <tr><th>What</th><th>Budget</th><th>Actual</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>JavaScript, whole site</td><td>&lt; 60 KB</td><td>≈ 5 KB, inlined and hash-pinned</td></tr>
+          <tr><td>CSS, gzipped</td><td>&lt; 30 KB</td><td>≈ 8 KB</td></tr>
+          <tr><td>Homepage HTML, gzipped</td><td>n/a</td><td>≈ 13 KB</td></tr>
+          <tr><td>Fonts</td><td>2 families</td><td>≈ 170 KB, the one deliberate spend, skipped with the power off</td></tr>
+          <tr><td>Images</td><td>n/a</td><td>0. Every diagram is SVG or HTML drawn from real numbers</td></tr>
+        </tbody>
+      </table>
+
+      <h2 id="craft">What's underneath</h2>
+      <ul>
+        <li>
+          <strong>Astro</strong> renders every page to static HTML. Case studies are typed MDX with a schema,
+          so a project can't be published without its role, status and evidence.
+        </li>
+        <li>
+          The "What keeps coming back" table on the homepage is <em>generated</em> from the case studies,
+          so it can't disagree with them.
+        </li>
+        <li>
+          A strict Content Security Policy with SHA-256 hashes for every script and style. No
+          <code>unsafe-inline</code> and no inline style attributes.
+        </li>
+        <li>
+          Semantic landmarks, a skip link, visible focus everywhere, a real <code>role="switch"</code>,
+          reduced-motion support, and light and dark themes that follow your system.
+        </li>
+        <li>Unit tests for the logic; browser tests for the switch, keyboard use and every breakpoint.</li>
+      </ul>
+
+      <h2 id="type">Type and colour</h2>
+      <p>
+        <em>Newsreader</em> for reading and headlines: a serif built for long-form text on screens.
+        <em>Schibsted Grotesk</em> for labels and numbers. It was drawn for a newspaper, which suits a site
+        that reads like a record. The palette is warm paper, blue-black ink, and a vermilion taken from the
+        rubber stamps on council forms.
+      </p>
+
+      <h2 id="next">What I'd still improve</h2>
+      <p>
+        Real photographs from the field: the auction yard, a building site mid-inspection. They're worth
+        more than any diagram, and I don't have good ones yet. Until I do, the diagrams stay honest rather
+        than illustrative.
+      </p>
+    </div>
+  </article>
+</Base>
+
+<style>
+  .colophon-head {
+    display: grid;
+    gap: var(--space-4);
+    padding-block: clamp(2.5rem, 1.5rem + 4vw, 5rem) var(--space-12);
+  }
+
+  .colophon-title {
+    font-size: clamp(2.25rem, 1.4rem + 3.2vw, 4.25rem);
+    font-weight: 380;
+    line-height: 1.02;
+    letter-spacing: -0.03em;
+    max-width: 16ch;
+  }
+
+  .colophon-lead {
+    font-size: var(--text-lead);
+    font-style: italic;
+    line-height: var(--leading-snug);
+    max-width: 34rem;
+  }
+
+  .colophon-body {
+    --margin-col: 15rem;
+    max-width: var(--measure);
+  }
+
+  @media (min-width: 72rem) {
+    .colophon-body {
+      margin-left: calc(12rem + var(--space-12));
+    }
+  }
+</style>

@@ -1,0 +1,78 @@
+---
+title: SmartRail ZW
+tier: supporting
+order: 1
+summary: Fare collection for Zimbabwe's national railway, designed to keep working with no network and no power.
+claim: The fare card is the only payment rail that still works in a tunnel during load-shedding. So the design starts with the card.
+role: Systems architecture, decision records
+period: June 2026
+year: 2026
+context: Architecture study, National Railways of Zimbabwe
+status: architecture
+stack: [MIFARE DESFire EV3, SAM / HSM key hierarchy, Store-and-forward sync, EcoCash, OneMoney]
+primitives: [offline-first, gated-money, audit-log, honest-scope, field-research]
+facts:
+  - { value: '<300 ms', label: 'target tap time, fully offline' }
+  - { value: '2', label: 'fare models on one card' }
+  - { value: '0', label: 'lines of code, on purpose (Phase 0)' }
+links:
+  - { label: 'Repository & ADRs', href: 'https://github.com/muudzo/smartrail-zw' }
+---
+
+import Note from '../../components/case/Note.astro';
+import Plate from '../../components/case/Plate.astro';
+
+## Context
+
+Zimbabwe's national railway is being rebuilt, and it needs a way to take fares. The reference model
+is Taiwan's EasyCard. Local conditions are different, though: mobile money dominates, few people
+have bank cards, connectivity is patchy, power cuts are scheduled, and there are two currencies
+(USD and ZiG) whose exchange rate moves.
+
+## Decisions
+
+Most fare systems today are *account-based*: the gate asks a server whether you've paid. That
+fails the moment the network or the grid does, and here both fail regularly.
+
+<Note kind="decision">
+  **Card first.** A stored-value smart card is the source of truth for its own balance, protected
+  by cryptography. Mobile money, QR and bank cards are online conveniences layered on top.
+</Note>
+
+<Note kind="rejected">
+  Mobile-money-first and QR-only fail during outages. Tap-your-bank-card fails on card
+  penetration. Both are kept, but not as the foundation.
+</Note>
+
+One card handles both fare models. Commuter lines charge tap-on, tap-off. Intercity trains carry a
+reserved-seat ticket loaded onto the card. The gate decides which applies by what it finds on the
+card. Currency policy (hold value in USD to shield riders from ZiG swings?) sits behind
+configuration. It's a regulator's decision, not a code change.
+
+## Build
+
+<Plate label="Key hierarchy" caption="Gates hold the key that takes money. Only top-up devices hold the key that adds it. A stolen gate can’t mint value.">
+  <pre class="plate-pre">Master issuer key        (HSM, never leaves the data centre)
+        │ diversified per card
+        ▼
+Per-card keys ── App master   (issuance only)
+              ├─ Debit        (gate SAMs)
+              ├─ Credit/load  (top-up SAMs only)
+              └─ Read/log     (inspector handhelds)</pre>
+  <p slot="text">One master issuer key lives in a hardware security module. Keys are derived for each card from it. Gate readers hold only the debit key, top-up devices hold the credit key, and inspectors can only read. Compromising a gate exposes one revocable module, never the master key.</p>
+</Plate>
+
+The whole tap (mutual authentication, reading entry state, checking the deny-list, computing
+the fare, an atomic debit that the card itself refuses if it would go negative) happens between
+the card and the reader. The central system is never in the tap path. Transactions are signed,
+queued, and sent on when the connection returns.
+
+## Where it stands
+
+This is Phase 0: requirements, a locked scope in an architecture decision record, and the card
+core designed in detail. **There is no application code, deliberately.** The next steps are
+regulatory conversations (RBZ, POTRAZ) and a build-versus-buy decision on card cryptography,
+which you buy rather than build.
+
+It's in this portfolio because it's the clearest example of how I think: start from what fails,
+put the source of truth where the failure can't reach it, and write the reasons down.

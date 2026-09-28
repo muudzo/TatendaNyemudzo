@@ -1,0 +1,123 @@
+---
+import type { MarkdownHeading } from 'astro';
+
+interface Props {
+  headings: MarkdownHeading[];
+}
+
+const sections = Astro.props.headings.filter((heading) => heading.depth === 2);
+---
+
+<nav class="rail" aria-label="Sections">
+  <ol>
+    {
+      sections.map((section, index) => (
+        <li>
+          <a href={`#${section.slug}`} data-rail-link={section.slug}>
+            <span class="rail-index numeral">{String(index + 1).padStart(2, '0')}</span>
+            <span>{section.text}</span>
+          </a>
+        </li>
+      ))
+    }
+  </ol>
+</nav>
+
+<script>
+  // Mark the section being read. Orientation only: no scroll hijacking.
+  const links = new Map(
+    [...document.querySelectorAll<HTMLAnchorElement>('[data-rail-link]')].map((link) => [
+      link.dataset.railLink,
+      link,
+    ]),
+  );
+  const headings = [...links.keys()]
+    .map((id) => (id ? document.getElementById(id) : null))
+    .filter((el): el is HTMLElement => el !== null);
+
+  const setCurrent = (id: string) => {
+    for (const [slug, link] of links) {
+      if (slug === id) link.setAttribute('aria-current', 'location');
+      else link.removeAttribute('aria-current');
+    }
+  };
+
+  if (headings.length && 'IntersectionObserver' in window) {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visible = entries.filter((entry) => entry.isIntersecting);
+        if (visible.length) setCurrent(visible[0].target.id);
+      },
+      { rootMargin: '0px 0px -70% 0px' },
+    );
+    headings.forEach((heading) => observer.observe(heading));
+  }
+</script>
+
+<style>
+  .rail {
+    font-family: var(--font-label);
+    font-size: var(--text-small);
+  }
+
+  ol {
+    display: flex;
+    gap: var(--space-2) var(--space-4);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  a {
+    display: flex;
+    gap: var(--space-2);
+    align-items: baseline;
+    padding-block: var(--space-2);
+    color: var(--ink-soft);
+    text-decoration: none;
+    white-space: nowrap;
+    transition: color var(--duration-fast) ease;
+  }
+
+  a:hover {
+    color: var(--ink);
+  }
+
+  .rail-index {
+    font-size: var(--text-label);
+    color: var(--ink-faint);
+  }
+
+  a[aria-current='location'] {
+    color: var(--ink);
+  }
+
+  a[aria-current='location'] .rail-index {
+    color: var(--stamp);
+  }
+
+  @media (min-width: 72rem) {
+    .rail {
+      position: sticky;
+      top: var(--space-8);
+    }
+
+    ol {
+      flex-direction: column;
+      gap: 0;
+      overflow: visible;
+    }
+
+    a {
+      position: relative;
+      padding-left: var(--space-4);
+      border-left: 1px solid var(--rule);
+    }
+
+    a[aria-current='location'] {
+      border-left-color: var(--stamp);
+    }
+  }
+</style>

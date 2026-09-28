@@ -3,7 +3,7 @@ import { glob } from 'astro/loaders';
 import { z } from 'astro/zod';
 import { PRIMITIVE_IDS } from './data/primitives';
 
-const link = z.object({ label: z.string(), href: z.string().url() });
+const link = z.object({ label: z.string(), href: z.url() });
 
 const work = defineCollection({
   loader: glob({ pattern: '*.mdx', base: './src/content/work' }),

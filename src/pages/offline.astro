@@ -1,0 +1,29 @@
+---
+import Base from '../layouts/Base.astro';
+---
+
+<Base title="Offline" description="You're offline. This page appears when a page hasn't been saved on this device yet.">
+  <section class="page fallback">
+    <p class="label">No connection</p>
+    <h1>This page hasn't been saved on your device yet.</h1>
+    <p>
+      Pages you've already opened still work offline. Try the <a href="/">homepage</a>, or come back to
+      this one when you're connected.
+    </p>
+  </section>
+</Base>
+
+<style>
+  .fallback {
+    display: grid;
+    gap: var(--space-4);
+    padding-block: var(--space-section);
+    max-width: 44rem;
+    margin-inline: 0;
+  }
+
+  h1 {
+    font-size: var(--text-title);
+    letter-spacing: -0.02em;
+  }
+</style>

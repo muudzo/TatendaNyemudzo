@@ -1,0 +1,157 @@
+---
+title: Vaka
+tier: flagship
+order: 2
+summary: Building-inspection and permit control for Zimbabwe's councils, where every stage is paid digitally and signed off on site.
+claim: Paper and cash made the inspection sequence optional. I turned it into a rule the software enforces.
+role: Research, service design, design system, full-stack build
+period: June – July 2026
+year: 2026
+context: Independent govtech venture
+status: prototype
+stack: [NestJS, Prisma, PostgreSQL, React 19, Vite, TanStack Query, Paynow]
+primitives: [field-research, gated-money, audit-log, fail-closed, honest-scope, idempotency]
+facts:
+  - { value: '5', label: 'inspection stages, each gated' }
+  - { value: '4', label: 'personas, one engine' }
+  - { value: '0', label: 'cash handled by inspectors' }
+  - { value: '14 days', label: 'legal route into government (ZIDA PPP)' }
+links:
+  - { label: 'Repository', href: 'https://github.com/muudzo/builders' }
+---
+
+import Note from '../../components/case/Note.astro';
+import SignaturePlate from '../../components/diagrams/SignaturePlate.astro';
+
+## Context
+
+*Vaka* is Shona for "to build". In Zimbabwe, building control belongs to local authorities:
+32 urban councils and around 60 rural ones, working under model building by-laws. If you're
+building a house, the council inspects it five times, from foundation to final sign-off,
+and you pay a fee at each stage.
+
+Today each stage means booking an inspector, waiting for a site visit, getting a paper card
+signed, and paying, often in cash.
+
+## Problem
+
+That process fails in three ways at once:
+
+1. **Paper per stage.** Files get lost, nobody can see status, and delays run to weeks. Local
+   guidance puts the foundation and final inspections at around a month each.
+2. **Cash per stage.** Fees leak before they reach the council's books. There's no audit trail,
+   and it exposes inspectors to bribery.
+3. **One inspector, many offices.** Travel, scheduling chaos, missed visits.
+
+Behind all three is the real problem: **the order of stages is only a convention.** Nothing stops
+a slab going down before the foundation is passed, or a fee being paid to the wrong pocket.
+
+## Thinking
+
+I started with the by-laws and the council guidance, and wrote a sourced research dossier before
+any code. Every figure I couldn't confirm is marked `[validate]` and stays out of the pitch until
+it's checked.
+
+<Note kind="evidence">
+  Harare and Bulawayo already accept Paynow for rates, fees and levies, via BillPay and council ERP
+  vendors.
+</Note>
+
+That finding changed the product. I had assumed digital payment was the innovation. It isn't:
+councils already take mobile money for bills. What *none* of them have is the workflow in between:
+stage gating, offline inspector sign-off, builder verification, a reconciled audit log.
+
+<Note kind="decision">
+  Vaka is the **orchestration layer**, not a payments competitor. It sits on the rail councils
+  already trust and holds no money itself. That also keeps it out of money-transmission
+  licensing.
+</Note>
+
+I also looked for the route into government, because "African government sales cycles are
+infinite" is the first objection anyone raises. The ZIDA Act (2020) accepts *unsolicited*
+public-private partnership proposals, with a preliminary assessment within 14 days. Nineteen of
+the 26 PPP proposals ZIDA received since late 2023 were unsolicited. There's a real door.
+
+## Design
+
+The core of the design is one rule:
+
+> A stage unlocks only after the previous stage is **paid** on Paynow and **passed** by an
+> inspector on site.
+
+<SignaturePlate slug="vaka" />
+
+Every stage moves through an explicit state machine:
+`LOCKED → AWAITING_PAYMENT → PAID_AWAITING_INSPECTION → BOOKED → INSPECTED_PASS | INSPECTED_FAIL`.
+A fail returns the stage to remediation. Only a pass opens the next gate.
+
+The same engine serves four people, each with a different surface:
+
+| Persona | Their surface | The one thing they need |
+|---|---|---|
+| Applicant / builder | Web (later USSD, WhatsApp) | "What do I do next?" One clear action per screen |
+| Inspector | Mobile, offline-first | Today's nearby jobs; photo + GPS + pass/fail |
+| Council clerk | Dashboard | Fees reconciled, inspector load, audit trail |
+| Ministry | Read-only overview | The national picture |
+
+A certificate of occupation is issued as a QR code that anyone can verify at a public URL without
+logging in. A forged paper certificate is easy to make; a forged record in the registry is not.
+
+I built a small design system, *Civic Confidence*, for this. Government software is usually
+either stark or decorative, and this needed to feel like an institution you can trust with
+money, while staying plain enough for a builder on a phone in the sun.
+
+## Build
+
+<Note kind="decision">
+  NestJS + Prisma + Postgres over Supabase. A government buyer needs data residency and
+  self-hosting on Zimbabwean infrastructure. A hosted backend was the wrong trade here, although
+  it was the right one for ZimLivestock.
+</Note>
+
+- **Guards, pipes, interceptors.** Role-based access on every endpoint; input validated at the
+  boundary, with unknown fields rejected; an interceptor writes an **append-only audit entry** for
+  every money or state transition.
+- **Atomic gates.** Recording an inspection and changing a stage's status commit together, or not
+  at all.
+- **Payments server-side only.** Without credentials it runs in simulation mode, so the demo
+  needs no keys. With keys it sends a real EcoCash prompt to the applicant's phone and polls to
+  settle. The demo shortcut is disabled in live mode.
+- **Fails closed.** In production it refuses to start with weak or default secrets. Auth uses
+  argon2id, short-lived access tokens held in memory, and httpOnly refresh cookies.
+
+I built it with AI coding agents working under a written contract: a `CLAUDE.md` that holds the
+domain glossary, the security checklist and the non-negotiables, plus a `CONTRACT.md` for the API
+and design. I write the decisions and constraints, and the agents work inside them.
+
+## Iteration
+
+The biggest change happened on paper, before the build. Positioning moved from "digital
+payments for councils" to "the inspection workflow on top of the payments councils already
+take". That removed a competitor (Paynow and BillPay) and turned it into infrastructure.
+
+The second change was scope. The first plan digitised everything: plan scrutiny, multi-council
+tenancy, live CIFOZ and ZIMRA lookups. I cut it to the **inspection → payment → sign-off loop**,
+because that's where the pain and the return on investment are sharpest.
+
+## Result
+
+A working prototype with seeded Bulawayo data and a three-minute demo: the applicant pays for a
+stage, the inspector signs it off with photo and GPS, the next stage unlocks, and the council
+sees the fee already reconciled with a full audit trail.
+
+<Note kind="open">
+  No council has used it yet. Permit volumes and fee schedules for a first council are still
+  marked `[validate]`. The next step is a no-cost pilot agreement with one council.
+</Note>
+
+## Reflection
+
+This is the project where I understood that the most valuable design decision can be a
+positioning decision. The research didn't change a screen; it changed *what the product is*.
+
+It also let me act on what ZimLivestock taught me. There, a single missing rule meant someone
+could win an auction for $1. Here I designed the rule first and let the screens follow from it.
+
+What I'd do differently: I should have talked to an inspector before designing the inspector's
+app. I know the process from documents. I don't yet know the day.

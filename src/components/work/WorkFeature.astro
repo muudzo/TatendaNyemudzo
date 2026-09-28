@@ -1,0 +1,224 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import SignaturePlate from '../diagrams/SignaturePlate.astro';
+import StatusStamp from './StatusStamp.astro';
+
+interface Props {
+  entry: CollectionEntry<'work'>;
+  index: number;
+}
+
+const { entry, index } = Astro.props;
+const { title, claim, summary, facts, context, period, status } = entry.data;
+const numeral = String(index + 1).padStart(2, '0');
+const plateSlug = entry.id as 'zimlivestock' | 'vaka' | 'investment-gamified';
+---
+
+<article class="work-feature" aria-labelledby={`feature-${entry.id}`}>
+  <div class="feature-numeral numeral" aria-hidden="true">{numeral}</div>
+  <header class="feature-head">
+    <p class="feature-meta label">
+      <span>{context}</span>
+      <span aria-hidden="true">·</span>
+      <span>{period}</span>
+    </p>
+    <h3 id={`feature-${entry.id}`} class="feature-title">
+      <a href={`/work/${entry.id}/`} class="feature-link">{title}</a>
+    </h3>
+    <p class="feature-summary">{summary}</p>
+  </header>
+  <p class="feature-claim">{claim}</p>
+  <div class="feature-plate">
+    <SignaturePlate slug={plateSlug} />
+  </div>
+  <dl class="feature-facts">
+    {
+      facts.map((fact) => (
+        <div>
+          <dt class="visually-hidden">{fact.label}</dt>
+          <dd>
+            <span class="fact-value numeral">{fact.value}</span>
+            <span class="fact-label">{fact.label}</span>
+          </dd>
+        </div>
+      ))
+    }
+  </dl>
+  <footer class="feature-foot">
+    <StatusStamp status={status} />
+    <span class="feature-read label" aria-hidden="true">Read the case study <span class="arrow">→</span></span>
+  </footer>
+</article>
+
+<style>
+  .work-feature {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      'numeral'
+      'head'
+      'claim'
+      'plate'
+      'facts'
+      'foot';
+    gap: var(--space-4);
+    padding-block: var(--space-8) var(--space-12);
+    border-top: 1px solid var(--ink);
+  }
+
+  .feature-numeral {
+    grid-area: numeral;
+    font-size: var(--text-numeral);
+    font-weight: 300;
+    line-height: 0.8;
+    letter-spacing: -0.04em;
+    color: var(--ink-faint);
+    transition: color var(--duration-normal) ease;
+  }
+
+  .work-feature:is(:hover, :focus-within) .feature-numeral {
+    color: var(--stamp);
+  }
+
+  .feature-head {
+    grid-area: head;
+    display: grid;
+    gap: var(--space-2);
+  }
+
+  .feature-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+
+  .feature-title {
+    font-size: var(--text-display);
+    font-weight: 400;
+    line-height: var(--leading-tight);
+    letter-spacing: -0.025em;
+  }
+
+  .feature-link {
+    text-decoration: none;
+  }
+
+  /* One link per entry, but the whole entry is the target. */
+  .feature-link::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+  }
+
+  .feature-link:focus-visible {
+    outline: none;
+  }
+
+  .work-feature:has(.feature-link:focus-visible) {
+    outline: 2px solid var(--stamp);
+    outline-offset: 6px;
+  }
+
+  .feature-summary {
+    font-family: var(--font-label);
+    font-size: var(--text-small);
+    color: var(--ink-soft);
+    max-width: 34rem;
+  }
+
+  .feature-claim {
+    grid-area: claim;
+    font-size: var(--text-lead);
+    font-style: italic;
+    line-height: var(--leading-snug);
+    max-width: 30rem;
+  }
+
+  .feature-plate {
+    grid-area: plate;
+    min-width: 0;
+  }
+
+  .feature-plate :global(.plate) {
+    margin: 0;
+  }
+
+  .feature-facts {
+    grid-area: facts;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-4) var(--space-6);
+    margin: 0;
+  }
+
+  .feature-facts dd {
+    display: grid;
+    gap: var(--space-1);
+    margin: 0;
+    padding-top: var(--space-2);
+    border-top: var(--hairline);
+  }
+
+  .fact-value {
+    font-size: 1.75rem;
+    font-weight: 500;
+    line-height: 1;
+    letter-spacing: -0.02em;
+  }
+
+  .fact-label {
+    font-family: var(--font-label);
+    font-size: 0.8125rem;
+    line-height: 1.35;
+    color: var(--ink-soft);
+  }
+
+  .feature-foot {
+    grid-area: foot;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+  }
+
+  .feature-read {
+    color: var(--ink);
+  }
+
+  .arrow {
+    display: inline-block;
+    transition: transform var(--duration-normal) var(--ease-out-expo);
+  }
+
+  .work-feature:hover .arrow {
+    transform: translateX(0.35rem);
+  }
+
+  @media (min-width: 64rem) {
+    .work-feature {
+      grid-template-columns: 7rem minmax(0, 5fr) minmax(0, 6fr);
+      grid-template-areas:
+        'numeral head plate'
+        'numeral claim plate'
+        'numeral facts plate'
+        'numeral foot plate';
+      grid-template-rows: auto auto 1fr auto;
+      gap: var(--space-6) var(--space-8);
+    }
+
+    .work-feature:nth-of-type(even) {
+      grid-template-columns: 7rem minmax(0, 6fr) minmax(0, 5fr);
+      grid-template-areas:
+        'numeral plate head'
+        'numeral plate claim'
+        'numeral plate facts'
+        'numeral plate foot';
+    }
+
+    .feature-facts {
+      align-self: end;
+    }
+  }
+</style>

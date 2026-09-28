@@ -1,0 +1,63 @@
+---
+/**
+ * A figure with a mandatory written twin. The visual is decorative to assistive tech; the text
+ * is always read by screen readers and is what the page shows with the power off.
+ */
+interface Props {
+  label: string;
+  caption: string;
+  wide?: boolean;
+}
+
+const { label, caption, wide = false } = Astro.props;
+---
+
+<figure class:list={['plate', { 'plate--wide': wide }]}>
+  <div class="plate-visual" aria-hidden="true">
+    <slot />
+  </div>
+  <div class="plate-text"><slot name="text" /></div>
+  <figcaption>
+    <span class="label">{label}</span>
+    <span class="plate-caption">{caption}</span>
+  </figcaption>
+</figure>
+
+<style>
+  .plate {
+    margin: var(--space-12) 0;
+    padding: var(--space-6);
+    background: var(--paper-deep);
+    border-top: 1px solid var(--ink);
+  }
+
+  .plate-visual {
+    overflow-x: auto;
+  }
+
+  .plate-text :global(p) {
+    font-size: var(--text-small);
+  }
+
+  figcaption {
+    display: grid;
+    gap: var(--space-1);
+    margin-top: var(--space-4);
+    padding-top: var(--space-3);
+    border-top: var(--hairline);
+  }
+
+  .plate-caption {
+    font-family: var(--font-label);
+    font-size: var(--text-small);
+    line-height: 1.45;
+    color: var(--ink-soft);
+    max-width: var(--measure);
+  }
+
+  @media (min-width: 72rem) {
+    .plate--wide {
+      margin-right: calc(-1 * (var(--margin-col, 0rem) + var(--space-12)));
+    }
+  }
+</style>
