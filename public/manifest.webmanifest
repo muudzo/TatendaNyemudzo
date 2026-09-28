@@ -1,0 +1,10 @@
+{
+  "name": "Tatenda Nyemudzo",
+  "short_name": "Tatenda",
+  "description": "Design and engineering for systems that keep working when conditions are bad.",
+  "start_url": "/",
+  "display": "browser",
+  "background_color": "#f7f3ea",
+  "theme_color": "#f7f3ea",
+  "icons": [{ "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml" }]
+}

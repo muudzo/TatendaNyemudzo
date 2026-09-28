@@ -1,0 +1,253 @@
+---
+/**
+ * Seven projects, different stacks, the same habits. The matrix is derived from each case study's
+ * declared primitives, so it can't disagree with the work.
+ */
+import type { CollectionEntry } from 'astro:content';
+import { PRIMITIVES } from '../../data/primitives';
+import { buildMatrix } from '../../lib/matrix';
+
+interface Props {
+  entries: CollectionEntry<'work'>[];
+}
+
+const { entries } = Astro.props;
+const projects = entries.map((entry) => ({
+  slug: entry.id,
+  title: entry.data.title,
+  primitives: entry.data.primitives,
+}));
+const { rows, columns } = buildMatrix(PRIMITIVES, projects);
+---
+
+<div class="matrix" data-matrix>
+  <table class="matrix-table">
+    <caption class="visually-hidden">
+      Which recurring practices appear in which projects. Rows are practices, most shared first.
+    </caption>
+    <thead>
+      <tr>
+        <td></td>
+        {
+          columns.map((project, col) => (
+            <th scope="col" data-col={col}>
+              <a href={`/work/${project.slug}/`}>{project.title}</a>
+            </th>
+          ))
+        }
+      </tr>
+    </thead>
+    <tbody>
+      {
+        rows.map((row) => (
+          <tr>
+            <th scope="row">
+              <span class="matrix-name">{row.primitive.name}</span>
+              <span class="matrix-note">{row.primitive.note}</span>
+            </th>
+            {row.cells.map((used, col) => (
+              <td data-col={col} class:list={{ used }}>
+                <span class="visually-hidden">{used ? 'Yes' : 'No'}</span>
+                <span class="dot" aria-hidden="true" />
+              </td>
+            ))}
+          </tr>
+        ))
+      }
+    </tbody>
+  </table>
+
+  <ul class="matrix-list">
+    {
+      rows.map((row) => (
+        <li>
+          <p class="matrix-name">
+            {row.primitive.name} <span class="numeral matrix-count">{row.count}/{columns.length}</span>
+          </p>
+          <p class="matrix-note">{row.primitive.note}</p>
+          <ul class="chips" aria-label={`Projects using: ${row.primitive.name}`}>
+            {columns
+              .filter((_, col) => row.cells[col])
+              .map((project) => (
+                <li>
+                  <a href={`/work/${project.slug}/`}>{project.title}</a>
+                </li>
+              ))}
+          </ul>
+        </li>
+      ))
+    }
+  </ul>
+</div>
+
+<script>
+  // Hovering or focusing a project's column header lights up the practices it uses.
+  for (const matrix of document.querySelectorAll<HTMLElement>('[data-matrix]')) {
+    const setActive = (col: string | null) => {
+      for (const cell of matrix.querySelectorAll<HTMLElement>('[data-col]')) {
+        cell.classList.toggle('active', col !== null && cell.dataset.col === col);
+      }
+      matrix.classList.toggle('has-active', col !== null);
+    };
+
+    for (const header of matrix.querySelectorAll<HTMLElement>('thead th[data-col]')) {
+      const col = header.dataset.col ?? null;
+      header.addEventListener('pointerenter', () => setActive(col));
+      header.addEventListener('pointerleave', () => setActive(null));
+      header.addEventListener('focusin', () => setActive(col));
+      header.addEventListener('focusout', () => setActive(null));
+    }
+  }
+</script>
+
+<style>
+  .matrix-table {
+    display: none;
+    width: 100%;
+    border-collapse: collapse;
+    font-family: var(--font-label);
+  }
+
+  thead th {
+    height: 11rem;
+    padding: 0 0 var(--space-3);
+    vertical-align: bottom;
+    border-bottom: 1px solid var(--ink);
+  }
+
+  thead th a {
+    display: inline-block;
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    font-size: var(--text-small);
+    font-weight: 560;
+    text-decoration: none;
+    white-space: nowrap;
+    padding: var(--space-2) 0;
+  }
+
+  thead th.active a,
+  thead th a:hover {
+    color: var(--stamp);
+  }
+
+  tbody th {
+    text-align: left;
+    padding: var(--space-3) var(--space-6) var(--space-3) 0;
+    font-weight: inherit;
+    width: 44%;
+  }
+
+  tbody tr {
+    border-bottom: var(--hairline);
+    transition: background-color var(--duration-fast) ease;
+  }
+
+  tbody tr:hover {
+    background: var(--paper-deep);
+  }
+
+  .matrix-name {
+    display: block;
+    font-family: var(--font-text);
+    font-size: 1.2rem;
+    line-height: 1.25;
+    color: var(--ink);
+  }
+
+  .matrix-note {
+    display: block;
+    margin-top: var(--space-1);
+    font-family: var(--font-label);
+    font-size: 0.8125rem;
+    line-height: 1.4;
+    color: var(--ink-soft);
+  }
+
+  td {
+    text-align: center;
+    padding: var(--space-2);
+    transition: opacity var(--duration-fast) ease;
+  }
+
+  .dot {
+    display: inline-block;
+    width: 0.75rem;
+    height: 0.75rem;
+    border-radius: 50%;
+    border: 1px solid var(--rule);
+    vertical-align: middle;
+    transition:
+      background-color var(--duration-fast) ease,
+      transform var(--duration-normal) var(--ease-out-expo);
+  }
+
+  td.used .dot {
+    background: var(--ink);
+    border-color: var(--ink);
+  }
+
+  .has-active td:not(.active) {
+    opacity: 0.35;
+  }
+
+  td.active.used .dot {
+    background: var(--stamp);
+    border-color: var(--stamp);
+    transform: scale(1.35);
+  }
+
+  /* Phone: a list of habits with the projects that share them. */
+  .matrix-list {
+    display: grid;
+    gap: var(--space-6);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .matrix-list > li {
+    padding-top: var(--space-3);
+    border-top: var(--hairline);
+  }
+
+  .matrix-count {
+    font-size: var(--text-label);
+    color: var(--ink-faint);
+    margin-left: var(--space-2);
+  }
+
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin: var(--space-3) 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .chips a {
+    display: inline-block;
+    padding: 0.35rem 0.6rem;
+    border: 1px solid var(--rule-strong);
+    border-radius: 999px;
+    font-family: var(--font-label);
+    font-size: 0.8125rem;
+    text-decoration: none;
+  }
+
+  .chips a:hover {
+    border-color: var(--stamp);
+    color: var(--stamp);
+  }
+
+  @media (min-width: 56rem) {
+    .matrix-table {
+      display: table;
+    }
+
+    .matrix-list {
+      display: none;
+    }
+  }
+</style>

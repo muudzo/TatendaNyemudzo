@@ -1,0 +1,95 @@
+---
+/**
+ * The bug Refactor 01 closed: two concurrent $600 buys against a $1,000 balance.
+ * This is the exact scenario in tests/Feature/ConcurrentTradeTest.php.
+ */
+---
+
+<div class="race">
+  <section class="race-col race-col--before">
+    <h3 class="label">Before · unlocked read</h3>
+    <ol>
+      <li><span>A reads balance</span><span class="numeral">$1,000</span></li>
+      <li><span>B reads balance</span><span class="numeral">$1,000</span></li>
+      <li><span>A buys</span><span class="numeral">−$600</span></li>
+      <li><span>B buys</span><span class="numeral">−$600</span></li>
+    </ol>
+    <p class="race-result"><span>Balance</span><span class="numeral">−$200</span></p>
+  </section>
+  <section class="race-col race-col--after">
+    <h3 class="label">After · <code>lockForUpdate()</code></h3>
+    <ol>
+      <li><span>A locks and reads</span><span class="numeral">$1,000</span></li>
+      <li><span>B waits for the lock</span><span class="numeral">…</span></li>
+      <li><span>A buys, releases</span><span class="numeral">−$600</span></li>
+      <li><span>B reads $400, rejected</span><span class="numeral">✕</span></li>
+    </ol>
+    <p class="race-result"><span>Balance</span><span class="numeral">$400</span></p>
+  </section>
+</div>
+
+<style>
+  .race {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-4);
+    min-width: 26rem;
+  }
+
+  .race-col {
+    display: grid;
+    align-content: start;
+    gap: var(--space-3);
+  }
+
+  .race-col h3 {
+    padding-bottom: var(--space-2);
+    border-bottom: 1px solid var(--ink);
+  }
+
+  .race-col h3 code {
+    font-size: 0.7rem;
+    text-transform: none;
+    letter-spacing: 0;
+  }
+
+  ol {
+    display: grid;
+    gap: var(--space-1);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  li,
+  .race-result {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-3);
+    font-family: var(--font-label);
+    font-size: 0.8125rem;
+    line-height: 1.35;
+  }
+
+  li {
+    padding-block: var(--space-1);
+    border-bottom: var(--hairline);
+  }
+
+  .race-result {
+    padding-top: var(--space-2);
+    font-weight: 650;
+    font-size: 0.9375rem;
+  }
+
+  .race-col--before .race-result .numeral {
+    color: var(--stamp);
+    text-decoration: line-through;
+    text-decoration-thickness: 2px;
+  }
+
+  :global(.work-feature:is(:hover, :focus-within)) .race-col--before {
+    opacity: 0.55;
+    transition: opacity var(--duration-normal) ease;
+  }
+</style>

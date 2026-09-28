@@ -1,0 +1,257 @@
+---
+import { getCollection, render, type CollectionEntry } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import SectionRail from '../../components/case/SectionRail.astro';
+import StatusStamp from '../../components/work/StatusStamp.astro';
+import { sortWork } from '../../lib/work';
+import '../../styles/prose.css';
+
+export async function getStaticPaths() {
+  const work = sortWork(await getCollection('work'));
+  return work.map((entry, index) => ({
+    params: { slug: entry.id },
+    props: { entry, next: work[(index + 1) % work.length] },
+  }));
+}
+
+interface Props {
+  entry: CollectionEntry<'work'>;
+  next: CollectionEntry<'work'>;
+}
+
+const { entry, next } = Astro.props;
+const { Content, headings } = await render(entry);
+const { title, summary, claim, role, period, context, status, stack, facts, links, tier } = entry.data;
+---
+
+<Base title={title} description={summary} ogImage={`/og/${entry.id}.png`}>
+  <article class="case" data-tier={tier}>
+    <header class="case-head page">
+      <p class="label case-kicker">
+        <a href="/#work">Work</a>
+        <span aria-hidden="true">/</span>
+        <span>{tier === 'flagship' ? 'Case study' : 'Short study'}</span>
+      </p>
+      <h1 class="case-title">{title}</h1>
+      <p class="case-claim">{claim}</p>
+
+      <dl class="record">
+        <div><dt class="label">Role</dt><dd>{role}</dd></div>
+        <div><dt class="label">When</dt><dd>{period}</dd></div>
+        <div><dt class="label">Context</dt><dd>{context}</dd></div>
+        <div><dt class="label">Status</dt><dd><StatusStamp status={status} /></dd></div>
+        <div class="record-wide"><dt class="label">Built with</dt><dd>{stack.join(' · ')}</dd></div>
+        {
+          links.length > 0 && (
+            <div class="record-wide">
+              <dt class="label">Links</dt>
+              <dd class="record-links">
+                {links.map((link) => (
+                  <a href={link.href} rel="noopener">
+                    {link.label} <span aria-hidden="true">↗</span>
+                  </a>
+                ))}
+              </dd>
+            </div>
+          )
+        }
+      </dl>
+
+      <dl class="case-facts">
+        {
+          facts.map((fact) => (
+            <div>
+              <dt class="visually-hidden">{fact.label}</dt>
+              <dd>
+                <span class="numeral case-fact-value">{fact.value}</span>
+                <span class="case-fact-label">{fact.label}</span>
+              </dd>
+            </div>
+          ))
+        }
+      </dl>
+      <p class="visually-hidden">{summary}</p>
+    </header>
+
+    <div class="case-body page">
+      <aside class="case-rail">
+        <SectionRail headings={headings} />
+      </aside>
+      <div class="prose">
+        <Content />
+      </div>
+    </div>
+
+    <nav class="case-next page" aria-label="Next project">
+      <a href={`/work/${next.id}/`}>
+        <span class="label">Next</span>
+        <span class="case-next-title">{next.data.title}</span>
+        <span class="case-next-claim">{next.data.summary}</span>
+      </a>
+    </nav>
+  </article>
+</Base>
+
+<style>
+  .case-head {
+    display: grid;
+    gap: var(--space-6);
+    padding-block: clamp(2.5rem, 1.5rem + 5vw, 6rem) var(--space-12);
+  }
+
+  .case-kicker {
+    display: flex;
+    gap: var(--space-2);
+  }
+
+  .case-kicker a {
+    text-decoration: none;
+  }
+
+  .case-title {
+    font-size: clamp(3rem, 1.5rem + 7vw, 8.5rem);
+    font-weight: 380;
+    line-height: 0.92;
+    letter-spacing: -0.045em;
+    view-transition-name: case-title;
+  }
+
+  .case-claim {
+    font-size: var(--text-lead);
+    font-style: italic;
+    line-height: var(--leading-snug);
+    max-width: 38rem;
+  }
+
+  .record {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    margin: var(--space-6) 0 0;
+    border-top: 1px solid var(--ink);
+  }
+
+  .record > div {
+    display: grid;
+    align-content: start;
+    gap: var(--space-1);
+    padding: var(--space-3) var(--space-4) var(--space-3) 0;
+    border-bottom: var(--hairline);
+  }
+
+  .record dd {
+    margin: 0;
+    font-family: var(--font-label);
+    font-size: var(--text-small);
+    line-height: 1.45;
+  }
+
+  .record-wide {
+    grid-column: 1 / -1;
+  }
+
+  .record-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2) var(--space-6);
+  }
+
+  .case-facts {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-6);
+    margin: var(--space-4) 0 0;
+  }
+
+  .case-facts dd {
+    display: grid;
+    gap: var(--space-1);
+    margin: 0;
+  }
+
+  .case-fact-value {
+    font-size: clamp(2rem, 1.5rem + 2vw, 3.25rem);
+    font-weight: 450;
+    line-height: 1;
+    letter-spacing: -0.03em;
+  }
+
+  .case-fact-label {
+    font-family: var(--font-label);
+    font-size: 0.8125rem;
+    line-height: 1.35;
+    color: var(--ink-soft);
+    max-width: 14rem;
+  }
+
+  .case-body {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-8);
+    --margin-col: 15rem;
+  }
+
+  .case-rail {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: var(--paper);
+    border-block: var(--hairline);
+    margin-inline: calc(-1 * var(--gutter));
+    padding-inline: var(--gutter);
+  }
+
+  .case-next {
+    margin-top: var(--space-section);
+  }
+
+  .case-next a {
+    display: grid;
+    gap: var(--space-2);
+    padding-top: var(--space-6);
+    border-top: 1px solid var(--ink);
+    text-decoration: none;
+  }
+
+  .case-next-title {
+    font-size: var(--text-display);
+    line-height: 1;
+    letter-spacing: -0.03em;
+    transition: color var(--duration-fast) ease;
+  }
+
+  .case-next a:hover .case-next-title {
+    color: var(--stamp);
+  }
+
+  .case-next-claim {
+    font-family: var(--font-label);
+    font-size: var(--text-small);
+    color: var(--ink-soft);
+    max-width: 36rem;
+  }
+
+  @media (min-width: 48rem) {
+    .record {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .case-facts {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+  }
+
+  @media (min-width: 72rem) {
+    .case-body {
+      grid-template-columns: 12rem minmax(0, var(--measure)) var(--margin-col);
+      column-gap: var(--space-12);
+    }
+
+    .case-rail {
+      position: static;
+      background: none;
+      border: 0;
+      margin: 0;
+      padding: 0;
+    }
+  }
+</style>

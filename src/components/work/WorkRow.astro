@@ -1,0 +1,96 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import StatusStamp from './StatusStamp.astro';
+
+interface Props {
+  entry: CollectionEntry<'work'>;
+}
+
+const { entry } = Astro.props;
+const { title, claim, context, year, status } = entry.data;
+---
+
+<article class="work-row">
+  <p class="row-year numeral">{year}</p>
+  <div class="row-main">
+    <h3 class="row-title"><a href={`/work/${entry.id}/`} class="row-link">{title}</a></h3>
+    <p class="row-context label">{context}</p>
+  </div>
+  <p class="row-claim">{claim}</p>
+  <div class="row-status"><StatusStamp status={status} /></div>
+</article>
+
+<style>
+  .work-row {
+    position: relative;
+    display: grid;
+    grid-template-columns: 3.5rem minmax(0, 1fr);
+    gap: var(--space-2) var(--space-4);
+    padding-block: var(--space-6);
+    border-top: var(--hairline);
+    transition: background-color var(--duration-fast) ease;
+  }
+
+  .work-row:hover {
+    background: var(--paper-deep);
+  }
+
+  .row-year {
+    grid-row: span 3;
+    font-size: var(--text-small);
+    color: var(--ink-faint);
+    padding-top: 0.4rem;
+  }
+
+  .row-title {
+    font-size: var(--text-title);
+    line-height: 1.05;
+    letter-spacing: -0.015em;
+  }
+
+  .row-link {
+    text-decoration: none;
+  }
+
+  .row-link::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+  }
+
+  .row-link:focus-visible {
+    outline: none;
+  }
+
+  .work-row:has(.row-link:focus-visible) {
+    outline: 2px solid var(--stamp);
+    outline-offset: 2px;
+  }
+
+  .row-context {
+    margin-top: var(--space-1);
+  }
+
+  .row-claim {
+    font-style: italic;
+    line-height: var(--leading-snug);
+    color: var(--ink-soft);
+    max-width: 34rem;
+  }
+
+  @media (min-width: 64rem) {
+    .work-row {
+      grid-template-columns: 5rem minmax(0, 4fr) minmax(0, 6fr) 12rem;
+      align-items: start;
+    }
+
+    .row-year {
+      grid-row: auto;
+    }
+
+    .row-status {
+      justify-self: end;
+      padding-top: 0.4rem;
+    }
+  }
+</style>

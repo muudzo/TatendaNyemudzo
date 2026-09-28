@@ -1,0 +1,112 @@
+---
+/**
+ * Vaka's five inspection stages. A stage unlocks only after the previous one is paid and passed.
+ * Shown mid-build: two passed, one paid and awaiting inspection, two locked.
+ */
+const STAGES = [
+  { name: 'Foundation', state: 'PASSED', kind: 'done' },
+  { name: 'DPC / slab', state: 'PASSED', kind: 'done' },
+  { name: 'Drainage', state: 'PAID · INSPECT', kind: 'current' },
+  { name: 'Super\u00ADstructure', state: 'LOCKED', kind: 'locked' },
+  { name: 'Final', state: 'LOCKED', kind: 'locked' },
+] as const;
+---
+
+<ol class="gate">
+  {
+    STAGES.map((stage, index) => (
+      <li class:list={['stage', `stage--${stage.kind}`]}>
+        <span class="stage-index numeral">{String(index + 1).padStart(2, '0')}</span>
+        <span class="stage-name">{stage.name}</span>
+        <code class="stage-state">{stage.state}</code>
+      </li>
+    ))
+  }
+</ol>
+
+<style>
+  .gate {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 3px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    min-width: 30rem;
+  }
+
+  .stage {
+    position: relative;
+    display: grid;
+    align-content: space-between;
+    gap: var(--space-6);
+    min-height: 8.5rem;
+    padding: var(--space-3);
+    border: 1px solid var(--ink);
+    background: var(--paper);
+    transition: background-color var(--duration-normal) ease;
+  }
+
+  .stage-index {
+    font-size: var(--text-label);
+    color: var(--ink-soft);
+  }
+
+  .stage-name {
+    font-size: 1.05rem;
+    line-height: 1.1;
+    hyphens: manual;
+  }
+
+  .stage-state {
+    padding: 0;
+    background: none;
+    font-size: 0.625rem;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+    color: var(--ink-soft);
+  }
+
+  .stage--done {
+    background: var(--ink);
+    color: var(--paper);
+  }
+
+  .stage--done .stage-index,
+  .stage--done .stage-state {
+    color: var(--paper);
+    opacity: 0.75;
+  }
+
+  .stage--current {
+    border-color: var(--stamp);
+    box-shadow: inset 0 0 0 1px var(--stamp);
+  }
+
+  .stage--current .stage-state {
+    color: var(--stamp);
+  }
+
+  .stage--locked {
+    border-style: dashed;
+    border-color: var(--rule-strong);
+    color: var(--ink-faint);
+  }
+
+  /* Hover the entry and the paid stage passes inspection: the next gate opens. */
+  :global(.work-feature:is(:hover, :focus-within)) .stage--current {
+    background: var(--stamp);
+    color: var(--paper);
+  }
+
+  :global(.work-feature:is(:hover, :focus-within)) .stage--current .stage-state {
+    color: var(--paper);
+  }
+
+  :global(.work-feature:is(:hover, :focus-within)) .stage--current + .stage {
+    border-style: solid;
+    border-color: var(--ink);
+    color: var(--ink);
+    transition-delay: 180ms;
+  }
+</style>

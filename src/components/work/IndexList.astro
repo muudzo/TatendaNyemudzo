@@ -1,0 +1,119 @@
+---
+import type { IndexItem } from '../../data/index';
+
+interface Props {
+  items: readonly IndexItem[];
+  label: string;
+}
+
+const { items, label } = Astro.props;
+const isExternal = (href: string) => href.startsWith('http');
+---
+
+<ul class="index-list" aria-label={label}>
+  {
+    items.map((item) => (
+      <li class="index-item">
+        <span class="index-year numeral">{item.year}</span>
+        <span class="index-title">{item.title}</span>
+        <span class="index-kind label">{item.kind}</span>
+        <p class="index-note">{item.note}</p>
+        <span class="index-links">
+          {item.live && (
+            <a href={item.live} rel={isExternal(item.live) ? 'noopener' : undefined}>
+              {isExternal(item.live) ? 'Live' : 'Open'}
+              <span class="visually-hidden"> {item.title}</span>
+            </a>
+          )}
+          {item.repo && (
+            <a href={item.repo} rel="noopener">
+              Code<span class="visually-hidden"> for {item.title}</span>
+            </a>
+          )}
+        </span>
+      </li>
+    ))
+  }
+</ul>
+
+<style>
+  .index-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .index-item {
+    display: grid;
+    grid-template-columns: 3.5rem minmax(0, 1fr) auto;
+    grid-template-areas:
+      'year title links'
+      'year kind kind'
+      'year note note';
+    gap: 0.15rem var(--space-4);
+    padding-block: var(--space-4);
+    border-top: var(--hairline);
+  }
+
+  .index-item:first-child {
+    border-top: 0;
+    padding-top: 0;
+  }
+
+  .index-year {
+    grid-area: year;
+    font-size: var(--text-small);
+    color: var(--ink-faint);
+    padding-top: 0.2rem;
+  }
+
+  .index-title {
+    grid-area: title;
+    font-size: 1.15rem;
+    line-height: 1.3;
+  }
+
+  .index-kind {
+    grid-area: kind;
+    font-size: 0.6875rem;
+  }
+
+  .index-note {
+    grid-area: note;
+    font-family: var(--font-label);
+    font-size: var(--text-small);
+    line-height: 1.45;
+    color: var(--ink-soft);
+    max-width: 44rem;
+    margin-top: var(--space-1);
+  }
+
+  .index-links {
+    grid-area: links;
+    display: flex;
+    gap: var(--space-4);
+    font-family: var(--font-label);
+    font-size: var(--text-small);
+    font-weight: 560;
+  }
+
+  .index-links a {
+    padding-block: var(--space-2);
+  }
+
+  @media (min-width: 64rem) {
+    .index-item {
+      grid-template-columns: 5rem minmax(0, 3fr) minmax(0, 2fr) minmax(0, 6fr) 8rem;
+      grid-template-areas: 'year title kind note links';
+      align-items: baseline;
+    }
+
+    .index-note {
+      margin-top: 0;
+    }
+
+    .index-links {
+      justify-content: flex-end;
+    }
+  }
+</style>

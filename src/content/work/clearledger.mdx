@@ -1,0 +1,54 @@
+---
+title: ClearLedger
+tier: supporting
+order: 4
+summary: A deliberately tiny tool that asks Zimbabwean merchants one question a day, and a test of whether they'll answer it.
+claim: I built this to find out whether it should die. The kill criteria were written before the code.
+role: Product hypothesis, backend build
+period: January 2026
+year: 2026
+context: Behaviour-testing MVP, merchant payments
+status: mvp
+stack: [Python, FastAPI, SQLModel, PostgreSQL, JWT]
+primitives: [honest-scope, audit-log, field-research]
+facts:
+  - { value: '1', label: 'question the product answers' }
+  - { value: '<30 s', label: 'target time to log a payment' }
+  - { value: '7 days', label: 'of real use to count as success' }
+links:
+  - { label: 'Repository', href: 'https://github.com/muudzo/cleartruthledger_mvp' }
+---
+
+import Note from '../../components/case/Note.astro';
+
+## Context
+
+A merchant in Harare might get paid through EcoCash, ZIPIT, a bank transfer, Paynow and cash, all
+on the same day. Some of that money arrives, some is pending, and some just disappears.
+
+## Decisions
+
+The whole product answers one question:
+
+> "How much money did I actually receive today, and where is it stuck?"
+
+<Note kind="decision">
+  **Kill criterion:** if merchants won't log transactions by hand, the product is invalid and gets
+  killed. That outcome counts as success. The MVP exists to test behaviour, not to scale.
+</Note>
+
+So there's no bank integration, no automation, and nothing clever. That's the point. If people won't
+do the simple version by hand, automating it answers the wrong question.
+
+## Build
+
+A small FastAPI backend with a pure ledger core. Each transaction records amount, channel,
+direction and status (expected, received, pending, missing), with an optional screenshot. A daily
+"truth" view groups the day by status and channel, and flags anything expected for more than 24
+hours. I deprecated the frontend so the test stayed focused on the backend and the behaviour.
+
+## Where it stands
+
+Success criteria are written: logging takes under 30 seconds, the daily screen needs no
+explanation, and the app survives seven days of real use. It's here because the discipline matters
+more than the code: decide in advance what would prove you wrong.

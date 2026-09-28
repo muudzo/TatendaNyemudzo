@@ -1,0 +1,206 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import WorkFeature from '../components/work/WorkFeature.astro';
+import WorkRow from '../components/work/WorkRow.astro';
+import PrimitivesMatrix from '../components/work/PrimitivesMatrix.astro';
+import IndexList from '../components/work/IndexList.astro';
+import { byTier, sortWork } from '../lib/work';
+import { EXPERIMENTS, ARCHIVE } from '../data/index';
+import { SITE } from '../data/site';
+
+const work = await getCollection('work');
+const flagships = byTier(work, 'flagship');
+const supporting = byTier(work, 'supporting');
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  name: SITE.name,
+  jobTitle: SITE.role,
+  description: SITE.description,
+  email: `mailto:${SITE.email}`,
+  url: Astro.site?.href,
+  sameAs: SITE.links.map((link) => link.href),
+  alumniOf: { '@type': 'CollegeOrUniversity', name: 'NHL Stenden University of Applied Sciences' },
+};
+---
+
+<Base jsonLd={jsonLd}>
+  <section class="statement page" aria-labelledby="statement-heading">
+    <div class="statement-main">
+      <h1 id="statement-heading" class="statement-text">
+        I design systems for the moment things go wrong, <em>and then I build them.</em>
+      </h1>
+      <p class="statement-sub">
+        Payments, public services and farming in Zimbabwe, where networks drop, the power cuts out
+        and trust runs thin. The same person does the field research, the interface and the code.
+      </p>
+      <p class="statement-proof label">
+        This site is built the same way. Switch the power off (top right) and it keeps working.
+      </p>
+    </div>
+    <dl class="statement-ledger">
+      <div>
+        <dt class="label">Now</dt>
+        <dd>Communication &amp; Multimedia Design at NHL Stenden, Leeuwarden, with a software-engineering focus</dd>
+      </div>
+      <div>
+        <dt class="label">Recently</dt>
+        <dd>Paynow internship: field research, a payments benchmark and a live marketplace</dd>
+      </div>
+      <div>
+        <dt class="label">Building</dt>
+        <dd>Vaka: stage-gated building inspection for Zimbabwe’s councils</dd>
+      </div>
+    </dl>
+  </section>
+
+  <section id="work" class="page work-section" aria-labelledby="work-heading">
+    <div class="section-head">
+      <h2 id="work-heading">Selected work</h2>
+      <span class="label">Research · design · build</span>
+    </div>
+    {flagships.map((entry, index) => <WorkFeature entry={entry} index={index} />)}
+  </section>
+
+  <section class="page work-section" aria-labelledby="supporting-heading">
+    <div class="section-head">
+      <h2 id="supporting-heading">More work</h2>
+      <span class="label">Shorter studies</span>
+    </div>
+    {supporting.map((entry) => <WorkRow entry={entry} />)}
+  </section>
+
+  <section class="page work-section matrix-section" aria-labelledby="matrix-heading">
+    <div class="section-head">
+      <h2 id="matrix-heading">What keeps coming back</h2>
+      <span class="label">Across 7 projects and 5 stacks</span>
+    </div>
+    <p class="matrix-intro">
+      Laravel, Supabase, NestJS, FastAPI, Cloudflare Workers. Different tools, the same habits. This
+      table is generated from the case studies themselves.
+    </p>
+    <PrimitivesMatrix entries={sortWork(work)} />
+  </section>
+
+  <section class="page work-section" aria-labelledby="index-heading">
+    <div class="section-head">
+      <h2 id="index-heading">Experiments</h2>
+      <span class="label">Small, curious, unfinished</span>
+    </div>
+    <IndexList items={EXPERIMENTS} label="Experiments" />
+
+    <div class="section-head archive-head">
+      <h2>Archive</h2>
+      <span class="label">The path here</span>
+    </div>
+    <IndexList items={ARCHIVE} label="Archive" />
+  </section>
+</Base>
+
+<style>
+  .statement {
+    display: grid;
+    gap: var(--space-8);
+    padding-block: clamp(2.5rem, 1.5rem + 4vw, 5rem) clamp(3rem, 2rem + 3vw, 4.5rem);
+  }
+
+  .statement-main {
+    display: grid;
+    gap: var(--space-6);
+  }
+
+  .statement-text {
+    font-size: clamp(2.25rem, 1.5rem + 3vw, 4rem);
+    font-weight: 380;
+    line-height: 1.04;
+    letter-spacing: -0.028em;
+    max-width: 16ch;
+  }
+
+  .statement-sub {
+    font-size: var(--text-lead);
+    line-height: 1.4;
+    color: var(--ink-soft);
+    max-width: 34rem;
+  }
+
+  .statement-proof {
+    padding-left: var(--space-3);
+    border-left: 2px solid var(--stamp);
+    color: var(--ink);
+    text-transform: none;
+    letter-spacing: 0.01em;
+    font-size: var(--text-small);
+    max-width: 34rem;
+  }
+
+  :root[data-power='off'] .statement-proof {
+    display: none;
+  }
+
+  /* On phones the ledger repeats the About page; the work matters more on a small first screen. */
+  .statement-ledger {
+    display: none;
+    gap: var(--space-4);
+    margin: 0;
+    align-content: end;
+  }
+
+  @media (min-width: 40rem) {
+    .statement-ledger {
+      display: grid;
+    }
+  }
+
+  .statement-ledger div {
+    display: grid;
+    grid-template-columns: 6.5rem 1fr;
+    align-content: start;
+    gap: var(--space-4);
+    padding-top: var(--space-3);
+    border-top: var(--hairline);
+  }
+
+  .statement-ledger dt {
+    padding-top: 0.3rem;
+  }
+
+  .statement-ledger dd {
+    margin: 0;
+    font-family: var(--font-label);
+    font-size: var(--text-small);
+    line-height: 1.45;
+  }
+
+  .work-section {
+    margin-top: var(--space-section);
+  }
+
+  #work {
+    margin-top: 0;
+  }
+
+  .matrix-intro {
+    max-width: var(--measure);
+    margin-bottom: var(--space-8);
+    color: var(--ink-soft);
+  }
+
+  .archive-head {
+    margin-top: var(--space-12);
+  }
+
+  @media (min-width: 64rem) {
+    .statement {
+      grid-template-columns: minmax(0, 7fr) minmax(0, 4fr);
+      column-gap: var(--space-12);
+      align-items: end;
+    }
+
+    .statement-ledger div {
+      grid-template-columns: 5.5rem 1fr;
+    }
+  }
+</style>
