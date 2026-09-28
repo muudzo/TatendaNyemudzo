@@ -39,7 +39,7 @@ const { rows, columns } = buildMatrix(PRIMITIVES, projects);
     </thead>
     <tbody>
       {
-        rows.map((row) => (
+        rows.map((row, rowIndex) => (
           <tr>
             <th scope="row">
               <span class="matrix-name">{row.primitive.name}</span>
@@ -48,7 +48,7 @@ const { rows, columns } = buildMatrix(PRIMITIVES, projects);
             {row.cells.map((used, col) => (
               <td data-col={col} class:list={{ used }}>
                 <span class="visually-hidden">{used ? 'Yes' : 'No'}</span>
-                <span class="dot" aria-hidden="true" />
+                <span class="dot" aria-hidden="true" data-seq={rowIndex + col} />
               </td>
             ))}
           </tr>

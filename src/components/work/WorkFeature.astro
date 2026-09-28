@@ -22,7 +22,7 @@ const plateSlug = entry.id as 'zimlivestock' | 'vaka' | 'investment-gamified';
       <span aria-hidden="true">·</span>
       <span>{period}</span>
     </p>
-    <h3 id={`feature-${entry.id}`} class="feature-title">
+    <h3 id={`feature-${entry.id}`} class="feature-title" data-title-for={`/work/${entry.id}/`}>
       <a href={`/work/${entry.id}/`} class="feature-link">{title}</a>
     </h3>
     <p class="feature-summary">{summary}</p>

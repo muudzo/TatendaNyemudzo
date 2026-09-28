@@ -13,7 +13,7 @@ const { title, claim, context, year, status } = entry.data;
 <article class="work-row">
   <p class="row-year numeral">{year}</p>
   <div class="row-main">
-    <h3 class="row-title"><a href={`/work/${entry.id}/`} class="row-link">{title}</a></h3>
+    <h3 class="row-title" data-title-for={`/work/${entry.id}/`}><a href={`/work/${entry.id}/`} class="row-link">{title}</a></h3>
     <p class="row-context label">{context}</p>
   </div>
   <p class="row-claim">{claim}</p>

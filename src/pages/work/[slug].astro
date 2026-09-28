@@ -85,7 +85,7 @@ const { title, summary, claim, role, period, context, status, stack, facts, link
     <nav class="case-next page" aria-label="Next project">
       <a href={`/work/${next.id}/`}>
         <span class="label">Next</span>
-        <span class="case-next-title">{next.data.title}</span>
+        <span class="case-next-title" data-title-for={`/work/${next.id}/`}>{next.data.title}</span>
         <span class="case-next-claim">{next.data.summary}</span>
       </a>
     </nav>
