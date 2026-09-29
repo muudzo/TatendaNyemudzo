@@ -79,6 +79,22 @@ a:hover {
   text-decoration-color: var(--stamp);
 }
 
+/* Links in running text: a lime highlighter sweeps under them. */
+main p a {
+  background-image: linear-gradient(var(--link-wash), var(--link-wash));
+  background-repeat: no-repeat;
+  background-size: 0% 100%;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+  transition:
+    background-size var(--duration-normal) var(--ease-out-expo),
+    text-decoration-color var(--duration-fast) ease;
+}
+
+main p a:hover {
+  background-size: 100% 100%;
+}
+
 :focus-visible {
   outline: 2px solid var(--stamp);
   outline-offset: 3px;
@@ -179,6 +195,52 @@ hr {
   letter-spacing: 0.02em;
 }
 
+/*
+ * Colour blocks: diagrams and the footer sit on the signature panel. Everything inside reads the
+ * usual tokens, so re-pointing them at the panel's inks re-colours the diagrams without touching them.
+ */
+.plate,
+.site-footer {
+  --paper: var(--panel);
+  --paper-deep: var(--panel);
+  --ink: var(--panel-ink);
+  --ink-soft: var(--panel-ink-soft);
+  --ink-faint: var(--panel-ink-faint);
+  --rule: var(--panel-rule);
+  --rule-strong: var(--panel-rule-strong);
+  --stamp: var(--panel-signal);
+  background: var(--panel);
+  color: var(--ink);
+}
+
+/*
+ * The sky: a fixed WebGL starfield behind everything (scripts/sky). It only exists with the power
+ * on and JavaScript running; the nebula glow is the canvas's own background, so it goes with it.
+ */
+.sky {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: -1;
+  width: 100%;
+  height: 100vh;
+  height: 100lvh;
+  pointer-events: none;
+  background: var(--sky-nebula);
+}
+
+/* The lights fade up once the page is in. With reduced motion the sky is simply there. */
+@media (prefers-reduced-motion: no-preference) {
+  .sky {
+    opacity: 0;
+    transition: opacity var(--duration-dawn) var(--ease-out-expo);
+  }
+
+  .sky.is-lit {
+    opacity: 1;
+  }
+}
+
 /* A section head already draws the top rule for the first item under it. */
 .section-head + * {
   border-top: 0 !important;
@@ -276,6 +338,7 @@ html.power-restoring::view-transition-group(masthead) {
   .masthead nav,
   .power,
   .site-footer,
+  .sky,
   .rail {
     display: none !important;
   }

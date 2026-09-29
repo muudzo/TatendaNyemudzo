@@ -30,8 +30,8 @@ const ogUrl = new URL(ogImage, Astro.site);
     <title>{fullTitle}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
-    <meta name="theme-color" content="#f7f3ea" media="(prefers-color-scheme: light)" />
-    <meta name="theme-color" content="#161a24" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#fcfdff" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#070b18" media="(prefers-color-scheme: dark)" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="manifest" href="/manifest.webmanifest" />
     <link rel="sitemap" href="/sitemap-index.xml" />
@@ -58,6 +58,8 @@ const ogUrl = new URL(ogImage, Astro.site);
           var saveData = !!(navigator.connection && navigator.connection.saveData);
           if (saved ? saved === 'off' : saveData) root.dataset.power = 'off';
           if (!saved && saveData) root.dataset.powerReason = 'save-data';
+          var theme = localStorage.getItem('theme');
+          if (theme === 'light' || theme === 'dark') root.dataset.theme = theme;
         } catch (e) {}
         if (root.dataset.power === 'off') return;
         var link = document.createElement('link');
@@ -81,9 +83,11 @@ const ogUrl = new URL(ogImage, Astro.site);
     <Footer />
     <script>
       import '../scripts/power';
+      import '../scripts/theme';
       import '../scripts/offline';
       import '../scripts/motion';
       import '../scripts/morph';
+      import '../scripts/sky';
     </script>
   </body>
 </html>

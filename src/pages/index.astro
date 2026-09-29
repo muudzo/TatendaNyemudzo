@@ -28,6 +28,7 @@ const jsonLd = {
 
 <Base jsonLd={jsonLd}>
   <section class="statement page" aria-labelledby="statement-heading">
+    <div class="planet-anchor" data-planet aria-hidden="true"></div>
     <div class="statement-main">
       <h1 id="statement-heading" class="statement-text">
         I design systems for the moment things go wrong, <em>and then I build them.</em>
@@ -101,9 +102,42 @@ const jsonLd = {
 
 <style>
   .statement {
+    position: relative;
+    /* The planet's box may reach past the edge of a phone; it must never make the page scroll. */
+    overflow-x: clip;
     display: grid;
     gap: var(--space-8);
     padding-block: clamp(2.5rem, 1.5rem + 4vw, 5rem) clamp(3rem, 2rem + 3vw, 4.5rem);
+  }
+
+  /*
+   * The place set aside for the planet (scripts/sky). The box stays empty; the sky behind the page
+   * draws a globe to fill it. Phones: rising behind the controls. Tablets: beside the claim.
+   * Desktop: above the ledger.
+   */
+  .planet-anchor {
+    position: absolute;
+    top: -7.5rem;
+    right: -2.75rem;
+    width: 10rem;
+    aspect-ratio: 1;
+    pointer-events: none;
+  }
+
+  @media (min-width: 40rem) {
+    .planet-anchor {
+      top: 3rem;
+      right: calc(var(--gutter) + 1.5rem);
+      width: 20vw;
+    }
+  }
+
+  @media (min-width: 64rem) {
+    .planet-anchor {
+      top: var(--space-4);
+      right: calc(var(--gutter) + 5%);
+      width: clamp(14rem, 22vw, 20rem);
+    }
   }
 
   .statement-main {
@@ -117,6 +151,15 @@ const jsonLd = {
     line-height: 1.04;
     letter-spacing: -0.028em;
     max-width: 16ch;
+  }
+
+  /* A highlighter stroke in light mode; the signal colour in dark mode (see --marker tokens). */
+  .statement-text em {
+    color: var(--marker-ink);
+    background: linear-gradient(transparent 58%, var(--marker) 58%, var(--marker) 92%, transparent 92%);
+    box-decoration-break: clone;
+    -webkit-box-decoration-break: clone;
+    padding-inline: 0.04em;
   }
 
   .statement-sub {

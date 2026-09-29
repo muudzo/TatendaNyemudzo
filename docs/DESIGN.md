@@ -149,15 +149,19 @@ the page says so.
 
 ## 8. Design system
 
-**Colour: paper, ink, and one stamp.**
+**Colour: cobalt and lime, one brand in two moods.** (Revised after launch: the original warm
+paper and vermilion felt too archival for Tatenda's taste; the ledger structure stayed.)
 
 | Token | Light | Dark | Meaning |
 |---|---|---|---|
-| `--paper` | warm off-white | deep blue-black | the page |
-| `--ink` | blue-black | warm off-white | text |
-| `--ink-soft` | 60% ink | | secondary text |
-| `--rule` | pale sepia | | hairlines |
-| `--stamp` | vermilion | lighter vermilion | **decisions, status, focus, the current thing**. Never decoration. |
+| `--paper` | near-white | deep navy-black | the page |
+| `--ink` | deep navy | warm off-white | text |
+| `--stamp` | cobalt | lime | **decisions, status, focus, the current thing**. Never decoration. |
+| `--pop` / `--marker` | lime highlighter under the key line | (cobalt accent) | the one expressive stroke |
+| `--panel` | cobalt | deep cobalt | the colour block diagrams and the footer sit on |
+
+Panels re-point the ordinary tokens (`.plate`, `.site-footer`), so every diagram re-colours
+without changes. Visitors can switch mode in the header; until they do, the system decides.
 
 Low-power mode drops to pure greyscale with system fonts.
 
@@ -168,6 +172,22 @@ No Inter, no Space Grotesk, and monospace only for real artifacts (commit hashes
 
 **Rhythm:** a 4px base, but deliberately uneven: tight inside a record, generous between records.
 Measure is ~66ch for reading.
+
+**The sky** (added after launch, at Tatenda's request for a 3D space background): a WebGL
+starfield fixed behind every page that the reader travels through as they scroll, and on the
+homepage a ringed planet drawn like one of the diagrams (lines of latitude and longitude, a lime
+ring). By day it is a printed star atlas; at night it is light. Decisions:
+
+- Hand-written WebGL, no Three.js: ~5 KB gzipped against ~150 KB. The site's argument is weight.
+- It belongs to having the power on. The renderer is fetched after `load`, never with the power
+  off or Save-Data, and cutting the power removes it. The nebula glow is the canvas's own
+  background, so it goes with it.
+- The page decides where the planet goes with an empty `[data-planet]` box that CSS lays out per
+  breakpoint (behind the controls on phones, beside the claim on tablets, above the ledger on
+  desktop). It rises away slightly faster than the page scrolls, so text never scrolls over it.
+- Reduced motion gets a still picture; the planet then scrolls with the page, like print.
+- Colours are tokens (`--sky-*`, `--planet-*`, `--nebula`); text is contrast-tested against the
+  brightest part of the glow.
 
 **Motion:** only for (a) orientation: section rail, (b) relationships: primitives matrix,
 (c) the power cut, (d) page-to-page cross-fade via CSS view transitions. `prefers-reduced-motion`
@@ -188,7 +208,7 @@ condition much of the work is designed for. Switching it off:
 Separately, a service worker caches pages as you read, so the site keeps working with no network.
 
 What someone should remember after leaving: *"the designer whose portfolio you can switch the
-power off on, and it still works, like the systems he builds."*
+power off on, and it still works, like the systems they build."*
 
 ## 10. Engineering
 

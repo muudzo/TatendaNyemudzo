@@ -14,6 +14,8 @@ for (const scheme of ['light', 'dark'] as const) {
         await page.setViewportSize({ width, height: 900 });
         await page.goto(surface.path);
         await page.evaluate(() => document.fonts.ready);
+        // The sky is fetched after load; with reduced motion it is a still, seeded picture.
+        await page.locator('canvas.sky.is-lit').waitFor();
         await expect(page).toHaveScreenshot(`${surface.name}-${scheme}-${width}.png`);
       });
     }

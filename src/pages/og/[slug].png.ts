@@ -56,12 +56,13 @@ function render({ kicker, title, line }: Card): string {
     .map((row, i) => `<tspan x="80" dy="${i === 0 ? 0 : 46}">${escapeXml(row)}</tspan>`)
     .join('');
   return `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
-  <rect width="1200" height="630" fill="#f7f3ea"/>
-  <rect x="80" y="80" width="1040" height="2" fill="#1c2130"/>
-  <text x="80" y="128" font-family="Helvetica, Arial, sans-serif" font-size="22" letter-spacing="3" fill="#4d5566">${escapeXml(kicker.toUpperCase())}</text>
-  <text x="80" y="290" font-family="Georgia, 'Times New Roman', serif" font-size="112" fill="#1c2130" letter-spacing="-3">${escapeXml(title)}</text>
-  <text x="80" y="390" font-family="Georgia, 'Times New Roman', serif" font-style="italic" font-size="36" fill="#1c2130">${lineRows}</text>
-  <circle cx="1100" cy="550" r="14" fill="#c4452c"/>
+  <rect width="1200" height="630" fill="#fcfdff"/>
+  <rect x="80" y="80" width="1040" height="2" fill="#0b1433"/>
+  <text x="80" y="128" font-family="Helvetica, Arial, sans-serif" font-size="22" letter-spacing="3" fill="#3d4a73">${escapeXml(kicker.toUpperCase())}</text>
+  <text x="80" y="290" font-family="Georgia, 'Times New Roman', serif" font-size="112" fill="#0b1433" letter-spacing="-3">${escapeXml(title)}</text>
+  <text x="80" y="390" font-family="Georgia, 'Times New Roman', serif" font-style="italic" font-size="36" fill="#0b1433">${lineRows}</text>
+  <rect x="0" y="590" width="1200" height="40" fill="#1a44e8"/>
+  <rect x="80" y="590" width="220" height="40" fill="#c6f432"/>
 </svg>`;
 }
 
