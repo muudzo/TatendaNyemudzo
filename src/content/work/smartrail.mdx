@@ -24,55 +24,38 @@ import Plate from '../../components/case/Plate.astro';
 
 ## Context
 
-Zimbabwe's national railway is being rebuilt, and it needs a way to take fares. The reference model
-is Taiwan's EasyCard. Local conditions are different, though: mobile money dominates, few people
-have bank cards, connectivity is patchy, power cuts are scheduled, and there are two currencies
-(USD and ZiG) whose exchange rate moves.
+Zimbabwe's national railway needs a way to take fares. Riders mostly pay with mobile money, few
+have bank cards, and connectivity and power both drop regularly.
 
 ## Decisions
 
-Most fare systems today are *account-based*: the gate asks a server whether you've paid. That
-fails the moment the network or the grid does, and here both fail regularly.
+Most modern fare systems ask a server whether you've paid. That fails the moment the network or
+the grid does.
 
 <Note kind="decision">
-  **Card first.** A stored-value smart card is the source of truth for its own balance, protected
-  by cryptography. Mobile money, QR and bank cards are online conveniences layered on top.
+  **Card first.** A stored-value smart card holds its own balance, protected by cryptography, so a
+  tap works with no network and no power. Mobile money and QR sit on top.
 </Note>
 
-<Note kind="rejected">
-  Mobile-money-first and QR-only fail during outages. Tap-your-bank-card fails on card
-  penetration. Both are kept, but not as the foundation.
-</Note>
-
-One card handles both fare models. Commuter lines charge tap-on, tap-off. Intercity trains carry a
-reserved-seat ticket loaded onto the card. The gate decides which applies by what it finds on the
-card. Currency policy (hold value in USD to shield riders from ZiG swings?) sits behind
-configuration. It's a regulator's decision, not a code change.
+One card handles both commuter tap-on/tap-off and reserved intercity seats.
 
 ## Build
 
-<Plate label="Key hierarchy" caption="Gates hold the key that takes money. Only top-up devices hold the key that adds it. A stolen gate can’t mint value.">
-  <pre class="plate-pre">Master issuer key        (HSM, never leaves the data centre)
-        │ diversified per card
+<Plate label="Key hierarchy" caption="Gates hold the key that takes money. Only top-up devices hold the key that adds it. A stolen gate can’t create value.">
+  <pre class="plate-pre">Master issuer key        (hardware security module)
+        │ derived per card
         ▼
-Per-card keys ── App master   (issuance only)
-              ├─ Debit        (gate SAMs)
-              ├─ Credit/load  (top-up SAMs only)
-              └─ Read/log     (inspector handhelds)</pre>
-  <p slot="text">One master issuer key lives in a hardware security module. Keys are derived for each card from it. Gate readers hold only the debit key, top-up devices hold the credit key, and inspectors can only read. Compromising a gate exposes one revocable module, never the master key.</p>
+Per-card keys ── Debit        (gates)
+              ├─ Credit/load  (top-up devices only)
+              └─ Read/log     (inspectors)</pre>
+  <p slot="text">A master key in a hardware security module derives keys for each card. Gates hold only the debit key, top-up devices the credit key, and inspectors can only read. A compromised gate can never add value.</p>
 </Plate>
 
-The whole tap (mutual authentication, reading entry state, checking the deny-list, computing
-the fare, an atomic debit that the card itself refuses if it would go negative) happens between
-the card and the reader. The central system is never in the tap path. Transactions are signed,
-queued, and sent on when the connection returns.
+The whole tap happens between card and reader in under 300 ms. Transactions queue and sync when
+the connection returns.
 
 ## Where it stands
 
-This is Phase 0: requirements, a locked scope in an architecture decision record, and the card
-core designed in detail. **There is no application code, deliberately.** The next steps are
-regulatory conversations (RBZ, POTRAZ) and a build-versus-buy decision on card cryptography,
-which you buy rather than build.
-
-It's in this portfolio because it's the clearest example of how I think: start from what fails,
-put the source of truth where the failure can't reach it, and write the reasons down.
+Architecture and decision records only, **deliberately no code yet**. The next step is regulatory
+conversations. It's here because it shows how I think: put the source of truth where the failure
+can't reach it.

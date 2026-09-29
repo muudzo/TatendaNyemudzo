@@ -9,7 +9,7 @@ interface Props {
 }
 
 const { entry, index } = Astro.props;
-const { title, claim, summary, facts, context, period, status } = entry.data;
+const { title, summary, facts, context, period, status } = entry.data;
 const numeral = String(index + 1).padStart(2, '0');
 const plateSlug = entry.id as 'zimlivestock' | 'vaka' | 'investment-gamified';
 ---
@@ -25,9 +25,8 @@ const plateSlug = entry.id as 'zimlivestock' | 'vaka' | 'investment-gamified';
     <h3 id={`feature-${entry.id}`} class="feature-title" data-title-for={`/work/${entry.id}/`}>
       <a href={`/work/${entry.id}/`} class="feature-link">{title}</a>
     </h3>
-    <p class="feature-summary">{summary}</p>
   </header>
-  <p class="feature-claim">{claim}</p>
+  <p class="feature-claim">{summary}</p>
   <div class="feature-plate">
     <SignaturePlate slug={plateSlug} />
   </div>
@@ -121,12 +120,6 @@ const plateSlug = entry.id as 'zimlivestock' | 'vaka' | 'investment-gamified';
     outline-offset: 6px;
   }
 
-  .feature-summary {
-    font-family: var(--font-label);
-    font-size: var(--text-small);
-    color: var(--ink-soft);
-    max-width: 34rem;
-  }
 
   .feature-claim {
     grid-area: claim;

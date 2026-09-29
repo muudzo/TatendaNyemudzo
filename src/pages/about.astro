@@ -6,23 +6,23 @@ import { SITE } from '../data/site';
 const PRINCIPLES = [
   {
     title: 'Go and look.',
-    body: 'An afternoon in a cattle auction told me more than a month of assumptions would have. I read the by-law before designing the form.',
+    body: 'One visit to a cattle auction beat a month of assumptions.',
   },
   {
     title: 'Design the rule, then the screen.',
-    body: '“Bids have one door.” “A stage unlocks only when it’s paid and passed.” If the rule is right and enforced, the interface can stay simple.',
+    body: 'If the rule is enforced, the interface can stay simple.',
   },
   {
     title: 'Assume it runs twice.',
-    body: 'Double-taps, retries, two requests at the same time. Money and records should come out right anyway.',
+    body: 'Double-taps and retries should never move money twice.',
   },
   {
     title: 'Say what it can’t do.',
-    body: 'Kill criteria, non-goals, residual risks. Someone who overestimates a system takes risks they shouldn’t.',
+    body: 'Kill criteria, non-goals and residual risks, in writing.',
   },
   {
     title: 'Write it down.',
-    body: 'Decision records, research dossiers, handovers that list what’s still red. The next person, often me, needs to know why.',
+    body: 'The next person, often me, needs to know why.',
   },
 ];
 ---
@@ -49,15 +49,9 @@ const PRINCIPLES = [
           fail somewhere their designers never looked.
         </p>
         <p>
-          Most of what I build is for Zimbabwe. Mobile money is the norm, the power is scheduled, and a
-          paper receipt is easy to fake. Those conditions make every design decision honest. You can't
-          hide a weak system behind a good-looking screen when the network drops in the middle of a
-          payment.
-        </p>
-        <p>
-          I don't think of myself as a designer who codes or a developer with taste. Most interesting
-          problems don't respect that line. The auction deposit was a design problem and a database
-          constraint. The inspection gate was a service-design decision and a state machine.
+          Most of what I build is for Zimbabwe, where mobile money is the norm, the power is scheduled
+          and a paper receipt is easy to fake. You can't hide a weak system behind a good screen when
+          the network drops mid-payment.
         </p>
       </div>
       <aside class="about-card" aria-label="In brief">
@@ -96,16 +90,10 @@ const PRINCIPLES = [
       </div>
       <div class="about-text">
         <p>
-          I build with AI coding agents every day, and I won't pretend otherwise. What I've learned is
-          that the valuable work sits around the agent: deciding what to build, writing the constraints it
-          works inside, reviewing what comes back, and noticing when it's confidently wrong. My
-          projects keep a written contract (a <code>CLAUDE.md</code> with the domain glossary, security
-          checklist and non-negotiables) for exactly that reason.
-        </p>
-        <p>
-          I got curious enough about where agents fail that I built <a
-            href="https://github.com/tatenda-source/agenteval">AgentEval</a
-          >, a small framework that scores agents on cost and correctness together.
+          I build with AI coding agents every day. The valuable work sits around them: deciding what to
+          build, writing the constraints they work inside, and noticing when they're confidently wrong.
+          That curiosity became <a href="https://github.com/tatenda-source/agenteval">AgentEval</a>, a
+          small framework that scores agents on cost and correctness together.
         </p>
       </div>
     </section>
@@ -130,19 +118,6 @@ const PRINCIPLES = [
       </ol>
     </section>
 
-    <section class="about-section" aria-labelledby="elsewhere-heading">
-      <div class="section-head">
-        <h2 id="elsewhere-heading">Away from the screen</h2>
-      </div>
-      <div class="about-text">
-        <p>
-          Not everything I build is for work. Pac-Man and chess ended up playable inside the first
-          version of this site, and there's a Rubik's cube project and a snake game in my repositories.
-          I also make small things in code for people I care about, the kind of project that only ever
-          has one user.
-        </p>
-      </div>
-    </section>
   </div>
 </Base>
 

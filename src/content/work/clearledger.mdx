@@ -23,8 +23,8 @@ import Note from '../../components/case/Note.astro';
 
 ## Context
 
-A merchant in Harare might get paid through EcoCash, ZIPIT, a bank transfer, Paynow and cash, all
-on the same day. Some of that money arrives, some is pending, and some just disappears.
+A merchant in Harare can be paid through EcoCash, ZIPIT, a bank, Paynow and cash on the same
+day. Some of that money arrives, some is pending, some disappears.
 
 ## Decisions
 
@@ -33,22 +33,16 @@ The whole product answers one question:
 > "How much money did I actually receive today, and where is it stuck?"
 
 <Note kind="decision">
-  **Kill criterion:** if merchants won't log transactions by hand, the product is invalid and gets
-  killed. That outcome counts as success. The MVP exists to test behaviour, not to scale.
+  **Kill criterion:** if merchants won't log transactions by hand, the product dies. That result
+  counts as success.
 </Note>
-
-So there's no bank integration, no automation, and nothing clever. That's the point. If people won't
-do the simple version by hand, automating it answers the wrong question.
 
 ## Build
 
-A small FastAPI backend with a pure ledger core. Each transaction records amount, channel,
-direction and status (expected, received, pending, missing), with an optional screenshot. A daily
-"truth" view groups the day by status and channel, and flags anything expected for more than 24
-hours. I deprecated the frontend so the test stayed focused on the backend and the behaviour.
+A small FastAPI ledger: log a payment, then see the day grouped by status and channel, with
+anything overdue by 24 hours flagged. No integrations, on purpose.
 
 ## Where it stands
 
-Success criteria are written: logging takes under 30 seconds, the daily screen needs no
-explanation, and the app survives seven days of real use. It's here because the discipline matters
-more than the code: decide in advance what would prove you wrong.
+Success means logging takes under 30 seconds and the app survives seven days of real use. The
+discipline is the point: decide in advance what would prove you wrong.
