@@ -9,6 +9,8 @@ interface Pair {
   scope: string;
   fg: string;
   bg: string;
+  /** A translucent token laid over the background, such as the sky's glow. */
+  over?: string;
   min: number;
 }
 
@@ -23,11 +25,16 @@ const PAIRS: Pair[] = [
   { name: 'captions on a panel', scope: '.plate', fg: '--panel-ink-soft', bg: '--panel', min: TEXT },
   { name: 'signal marks on a panel', scope: '.plate', fg: '--panel-signal', bg: '--panel', min: TEXT },
   { name: 'faint marks on a panel', scope: '.plate', fg: '--panel-ink-faint', bg: '--panel', min: LARGE },
+  // The sky's glow at its brightest, under the text that can sit over it (nav, labels, the ledger).
+  { name: 'body text under the glow', scope: ':root', fg: '--ink', bg: '--paper', over: '--nebula', min: TEXT },
+  { name: 'secondary text under the glow', scope: ':root', fg: '--ink-soft', bg: '--paper', over: '--nebula', min: TEXT },
+  { name: 'faint text under the glow', scope: ':root', fg: '--ink-faint', bg: '--paper', over: '--nebula', min: TEXT },
+  { name: 'faint text under the far glow', scope: ':root', fg: '--ink-faint', bg: '--paper', over: '--nebula-far', min: TEXT },
 ];
 
 /** Resolve two token colours to sRGB in the browser (via canvas) and return their contrast ratio. */
 function contrast(page: Page, pair: Pair): Promise<number> {
-  return page.evaluate(({ scope, fg, bg }) => {
+  return page.evaluate(({ scope, fg, bg, over }) => {
     const element = scope === ':root' ? document.documentElement : document.querySelector(scope);
     if (!element) throw new Error(`No element for ${scope}`);
     const style = getComputedStyle(element);
@@ -36,10 +43,12 @@ function contrast(page: Page, pair: Pair): Promise<number> {
     const context = canvas.getContext('2d', { willReadFrequently: true });
     if (!context) throw new Error('No canvas');
 
-    const luminance = (token: string) => {
+    const luminance = (...tokens: string[]) => {
       context.clearRect(0, 0, 1, 1);
-      context.fillStyle = style.getPropertyValue(token).trim();
-      context.fillRect(0, 0, 1, 1);
+      for (const token of tokens) {
+        context.fillStyle = style.getPropertyValue(token).trim();
+        context.fillRect(0, 0, 1, 1);
+      }
       const [r, g, b] = [...context.getImageData(0, 0, 1, 1).data].slice(0, 3).map((value) => {
         const channel = value / 255;
         return channel <= 0.04045 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4;
@@ -47,7 +56,8 @@ function contrast(page: Page, pair: Pair): Promise<number> {
       return 0.2126 * r + 0.7152 * g + 0.0722 * b;
     };
 
-    const [light, dark] = [luminance(fg), luminance(bg)].sort((a, b) => b - a);
+    const background = over ? luminance(bg, over) : luminance(bg);
+    const [light, dark] = [luminance(fg), background].sort((a, b) => b - a);
     return (light + 0.05) / (dark + 0.05);
   }, pair);
 }

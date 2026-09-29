@@ -173,6 +173,22 @@ No Inter, no Space Grotesk, and monospace only for real artifacts (commit hashes
 **Rhythm:** a 4px base, but deliberately uneven: tight inside a record, generous between records.
 Measure is ~66ch for reading.
 
+**The sky** (added after launch, at Tatenda's request for a 3D space background): a WebGL
+starfield fixed behind every page that the reader travels through as they scroll, and on the
+homepage a ringed planet drawn like one of the diagrams (lines of latitude and longitude, a lime
+ring). By day it is a printed star atlas; at night it is light. Decisions:
+
+- Hand-written WebGL, no Three.js: ~5 KB gzipped against ~150 KB. The site's argument is weight.
+- It belongs to having the power on. The renderer is fetched after `load`, never with the power
+  off or Save-Data, and cutting the power removes it. The nebula glow is the canvas's own
+  background, so it goes with it.
+- The page decides where the planet goes with an empty `[data-planet]` box that CSS lays out per
+  breakpoint (behind the controls on phones, beside the claim on tablets, above the ledger on
+  desktop). It rises away slightly faster than the page scrolls, so text never scrolls over it.
+- Reduced motion gets a still picture; the planet then scrolls with the page, like print.
+- Colours are tokens (`--sky-*`, `--planet-*`, `--nebula`); text is contrast-tested against the
+  brightest part of the glow.
+
 **Motion:** only for (a) orientation: section rail, (b) relationships: primitives matrix,
 (c) the power cut, (d) page-to-page cross-fade via CSS view transitions. `prefers-reduced-motion`
 removes all of it with no loss of meaning.
@@ -192,7 +208,7 @@ condition much of the work is designed for. Switching it off:
 Separately, a service worker caches pages as you read, so the site keeps working with no network.
 
 What someone should remember after leaving: *"the designer whose portfolio you can switch the
-power off on, and it still works, like the systems he builds."*
+power off on, and it still works, like the systems they build."*
 
 ## 10. Engineering
 

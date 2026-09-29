@@ -6,7 +6,7 @@ import '../styles/prose.css';
 
 <Base
   title="This site"
-  description="Why the first version of this portfolio was retired, and how this one is built: a power switch, offline reading and very little JavaScript."
+  description="Why the first version of this portfolio was retired, and how this one is built: a power switch, offline reading, a hand-built WebGL sky and very little JavaScript."
 >
   <article class="page colophon">
     <header class="colophon-head">
@@ -38,13 +38,23 @@ import '../styles/prose.css';
         keeps every page you've opened readable with no connection. That part isn't a simulation.
       </p>
 
+      <h2 id="sky">The sky</h2>
+      <p>
+        Behind the pages is a field of stars you travel through as you scroll, and on the homepage a
+        planet drawn like one of the diagrams. It's hand-written WebGL: two small shaders and no 3D
+        library, so the whole sky weighs about 5 KB. It loads after the words, holds still for anyone
+        who prefers reduced motion, and goes out when you cut the power. A real outage takes the
+        luxuries first.
+      </p>
+
       <h2 id="budgets">Measured</h2>
       <table>
         <thead>
           <tr><th>What</th><th>Actual</th></tr>
         </thead>
         <tbody>
-          <tr><td>JavaScript, whole site</td><td>≈ 7 KB (3 KB gzipped), no libraries</td></tr>
+          <tr><td>JavaScript, whole site</td><td>≈ 8 KB (3.5 KB gzipped), no libraries</td></tr>
+          <tr><td>The sky (WebGL)</td><td>≈ 12 KB (5 KB gzipped), fetched after the page loads, only with the power on</td></tr>
           <tr><td>CSS, gzipped</td><td>≈ 12 KB</td></tr>
           <tr><td>Fonts</td><td>≈ 170 KB, skipped with the power off</td></tr>
           <tr><td>Images</td><td>0. Every diagram is drawn from real numbers</td></tr>
