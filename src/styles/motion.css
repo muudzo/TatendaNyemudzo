@@ -144,6 +144,13 @@
     animation: rule-draw var(--duration-rule) var(--ease-out-expo) var(--delay, 0ms) backwards;
   }
 
+  /* A panel's top edge is drawn in its signal colour, matching the border it stands in for. */
+  :root:not([data-power='off']) .plate:is(.is-pending, .is-in)::after {
+    top: -2px;
+    height: 2px;
+    background: var(--stamp);
+  }
+
   :root:not([data-power='off']) .section-head:is(.is-pending, .is-in)::after {
     top: auto;
     bottom: -1px;

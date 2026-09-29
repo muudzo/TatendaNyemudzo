@@ -179,6 +179,24 @@ hr {
   letter-spacing: 0.02em;
 }
 
+/*
+ * Colour blocks: diagrams and the footer sit on the signature panel. Everything inside reads the
+ * usual tokens, so re-pointing them at the panel's inks re-colours the diagrams without touching them.
+ */
+.plate,
+.site-footer {
+  --paper: var(--panel);
+  --paper-deep: var(--panel);
+  --ink: var(--panel-ink);
+  --ink-soft: var(--panel-ink-soft);
+  --ink-faint: var(--panel-ink-faint);
+  --rule: var(--panel-rule);
+  --rule-strong: var(--panel-rule-strong);
+  --stamp: var(--panel-signal);
+  background: var(--panel);
+  color: var(--ink);
+}
+
 /* A section head already draws the top rule for the first item under it. */
 .section-head + * {
   border-top: 0 !important;

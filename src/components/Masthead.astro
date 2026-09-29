@@ -1,5 +1,6 @@
 ---
 import PowerSwitch from './PowerSwitch.astro';
+import ThemeSwitch from './ThemeSwitch.astro';
 import { NAV, SITE } from '../data/site';
 
 const path = Astro.url.pathname;
@@ -25,6 +26,7 @@ const isCurrent = (href: string) => href !== '/#work' && path.startsWith(href);
         }
       </ul>
     </nav>
+    <div class="theme-slot"><ThemeSwitch /></div>
     <PowerSwitch />
   </div>
   <div class="power-strip" id="power-strip" role="status" aria-live="polite" hidden>
@@ -46,7 +48,7 @@ const isCurrent = (href: string) => href !== '/#work' && path.startsWith(href);
     grid-template-columns: 1fr auto;
     grid-template-areas:
       'mark power'
-      'nav nav';
+      'nav theme';
     align-items: center;
     gap: var(--space-3) var(--space-6);
     padding-block: var(--space-4);
@@ -75,6 +77,11 @@ const isCurrent = (href: string) => href !== '/#work' && path.startsWith(href);
 
   nav {
     grid-area: nav;
+  }
+
+  .theme-slot {
+    grid-area: theme;
+    justify-self: end;
   }
 
   nav ul {
@@ -127,9 +134,9 @@ const isCurrent = (href: string) => href !== '/#work' && path.startsWith(href);
 
   @media (min-width: 48rem) {
     .masthead-inner {
-      grid-template-columns: 1fr auto auto;
-      grid-template-areas: 'mark nav power';
-      gap: var(--space-8);
+      grid-template-columns: 1fr auto auto auto;
+      grid-template-areas: 'mark nav theme power';
+      column-gap: var(--space-8);
     }
   }
 </style>

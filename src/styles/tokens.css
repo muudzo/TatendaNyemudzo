@@ -1,20 +1,35 @@
 /*
- * Paper, ink, and one stamp.
- * --stamp is reserved for decisions, status, focus and "the current thing". Never decoration.
+ * Cobalt and lime: one brand, two moods.
+ * Light leads with cobalt and uses lime as a highlighter; dark leads with lime on deep navy.
+ * --stamp is the signal colour: decisions, status, focus and "the current thing". Never decoration.
+ * --panel is the colour block that diagrams and the footer sit on, in both modes.
  */
 :root {
   color-scheme: light;
 
-  --paper: oklch(97.2% 0.011 85);
-  --paper-deep: oklch(93.6% 0.016 83);
-  --ink: oklch(22% 0.028 262);
-  --ink-soft: oklch(43% 0.022 262);
-  --ink-faint: oklch(58% 0.016 262);
-  --rule: oklch(84% 0.02 80);
-  --rule-strong: oklch(70% 0.02 80);
-  --stamp: oklch(55.5% 0.185 33);
-  --stamp-wash: oklch(55.5% 0.185 33 / 0.1);
-  --selection: oklch(55.5% 0.185 33 / 0.18);
+  --paper: oklch(99.3% 0.002 264);
+  --paper-deep: oklch(96% 0.012 264);
+  --ink: oklch(17% 0.045 264);
+  --ink-soft: oklch(40% 0.04 264);
+  --ink-faint: oklch(54% 0.03 264);
+  --rule: oklch(89% 0.015 264);
+  --rule-strong: oklch(70% 0.03 264);
+  --stamp: oklch(48% 0.24 264);
+  --stamp-wash: oklch(48% 0.24 264 / 0.1);
+  --selection: oklch(91% 0.21 125 / 0.6);
+  --pop: oklch(91% 0.21 125);
+
+  /* The highlighter stroke under the key line of the statement. */
+  --marker: var(--pop);
+  --marker-ink: var(--ink);
+
+  --panel: oklch(48% 0.24 264);
+  --panel-ink: oklch(98.5% 0.01 264);
+  --panel-ink-soft: oklch(91% 0.045 264);
+  --panel-ink-faint: oklch(82% 0.08 264);
+  --panel-rule: oklch(62% 0.17 264);
+  --panel-rule-strong: oklch(76% 0.12 264);
+  --panel-signal: var(--pop);
 
   --font-text: 'Newsreader Variable', 'Iowan Old Style', 'Palatino Linotype', Georgia, serif;
   --font-label: 'Schibsted Grotesk Variable', 'Helvetica Neue', Arial, sans-serif;
@@ -70,31 +85,51 @@
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
     color-scheme: dark;
-    --paper: oklch(19% 0.018 262);
-    --paper-deep: oklch(23.5% 0.02 262);
-    --ink: oklch(93% 0.014 85);
-    --ink-soft: oklch(78% 0.014 85);
-    --ink-faint: oklch(64% 0.012 85);
-    --rule: oklch(34% 0.02 262);
-    --rule-strong: oklch(48% 0.02 262);
-    --stamp: oklch(70% 0.16 36);
-    --stamp-wash: oklch(70% 0.16 36 / 0.14);
-    --selection: oklch(70% 0.16 36 / 0.28);
+    --paper: oklch(14.5% 0.03 266);
+    --paper-deep: oklch(19% 0.04 266);
+    --ink: oklch(96.5% 0.012 110);
+    --ink-soft: oklch(81% 0.02 250);
+    --ink-faint: oklch(66% 0.03 255);
+    --rule: oklch(28% 0.045 266);
+    --rule-strong: oklch(44% 0.06 266);
+    --stamp: oklch(91% 0.21 125);
+    --stamp-wash: oklch(91% 0.21 125 / 0.14);
+    --selection: oklch(48% 0.24 264 / 0.6);
+    --pop: oklch(62% 0.2 264);
+    --marker: transparent;
+    --marker-ink: var(--stamp);
+    --panel: oklch(36% 0.18 264);
+    --panel-ink: oklch(98.5% 0.01 264);
+    --panel-ink-soft: oklch(89% 0.05 264);
+    --panel-ink-faint: oklch(77% 0.09 264);
+    --panel-rule: oklch(50% 0.17 264);
+    --panel-rule-strong: oklch(64% 0.14 264);
+    --panel-signal: oklch(91% 0.21 125);
   }
 }
 
 :root[data-theme='dark'] {
   color-scheme: dark;
-  --paper: oklch(19% 0.018 262);
-  --paper-deep: oklch(23.5% 0.02 262);
-  --ink: oklch(93% 0.014 85);
-  --ink-soft: oklch(78% 0.014 85);
-  --ink-faint: oklch(64% 0.012 85);
-  --rule: oklch(34% 0.02 262);
-  --rule-strong: oklch(48% 0.02 262);
-  --stamp: oklch(70% 0.16 36);
-  --stamp-wash: oklch(70% 0.16 36 / 0.14);
-  --selection: oklch(70% 0.16 36 / 0.28);
+  --paper: oklch(14.5% 0.03 266);
+  --paper-deep: oklch(19% 0.04 266);
+  --ink: oklch(96.5% 0.012 110);
+  --ink-soft: oklch(81% 0.02 250);
+  --ink-faint: oklch(66% 0.03 255);
+  --rule: oklch(28% 0.045 266);
+  --rule-strong: oklch(44% 0.06 266);
+  --stamp: oklch(91% 0.21 125);
+  --stamp-wash: oklch(91% 0.21 125 / 0.14);
+  --selection: oklch(48% 0.24 264 / 0.6);
+  --pop: oklch(62% 0.2 264);
+  --marker: transparent;
+  --marker-ink: var(--stamp);
+  --panel: oklch(36% 0.18 264);
+  --panel-ink: oklch(98.5% 0.01 264);
+  --panel-ink-soft: oklch(89% 0.05 264);
+  --panel-ink-faint: oklch(77% 0.09 264);
+  --panel-rule: oklch(50% 0.17 264);
+  --panel-rule-strong: oklch(64% 0.14 264);
+  --panel-signal: oklch(91% 0.21 125);
 }
 
 /*
@@ -112,6 +147,16 @@
   --stamp: oklch(15% 0 0);
   --stamp-wash: oklch(15% 0 0 / 0.06);
   --selection: oklch(15% 0 0 / 0.15);
+  --pop: var(--ink);
+  --marker: transparent;
+  --marker-ink: var(--ink);
+  --panel: var(--paper-deep);
+  --panel-ink: var(--ink);
+  --panel-ink-soft: var(--ink-soft);
+  --panel-ink-faint: var(--ink-faint);
+  --panel-rule: var(--rule);
+  --panel-rule-strong: var(--rule-strong);
+  --panel-signal: var(--ink);
   --font-text: Georgia, 'Times New Roman', serif;
   --font-label: system-ui, sans-serif;
   --duration-fast: 0ms;
@@ -133,7 +178,22 @@
     --rule-strong: oklch(45% 0 0);
     --stamp: oklch(88% 0 0);
     --stamp-wash: oklch(88% 0 0 / 0.08);
+    --marker-ink: var(--ink);
   }
+}
+
+/* The same, when dark was chosen with the theme switch rather than by the system. */
+:root[data-power='off'][data-theme='dark'] {
+  --paper: oklch(12% 0 0);
+  --paper-deep: oklch(17% 0 0);
+  --ink: oklch(88% 0 0);
+  --ink-soft: oklch(72% 0 0);
+  --ink-faint: oklch(60% 0 0);
+  --rule: oklch(30% 0 0);
+  --rule-strong: oklch(45% 0 0);
+  --stamp: oklch(88% 0 0);
+  --stamp-wash: oklch(88% 0 0 / 0.08);
+  --marker-ink: var(--ink);
 }
 
 @media (prefers-reduced-motion: reduce) {

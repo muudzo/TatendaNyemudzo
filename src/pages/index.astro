@@ -119,6 +119,15 @@ const jsonLd = {
     max-width: 16ch;
   }
 
+  /* A highlighter stroke in light mode; the signal colour in dark mode (see --marker tokens). */
+  .statement-text em {
+    color: var(--marker-ink);
+    background: linear-gradient(transparent 58%, var(--marker) 58%, var(--marker) 92%, transparent 92%);
+    box-decoration-break: clone;
+    -webkit-box-decoration-break: clone;
+    padding-inline: 0.04em;
+  }
+
   .statement-sub {
     font-size: var(--text-lead);
     line-height: 1.4;

@@ -149,15 +149,19 @@ the page says so.
 
 ## 8. Design system
 
-**Colour: paper, ink, and one stamp.**
+**Colour: cobalt and lime, one brand in two moods.** (Revised after launch: the original warm
+paper and vermilion felt too archival for Tatenda's taste; the ledger structure stayed.)
 
 | Token | Light | Dark | Meaning |
 |---|---|---|---|
-| `--paper` | warm off-white | deep blue-black | the page |
-| `--ink` | blue-black | warm off-white | text |
-| `--ink-soft` | 60% ink | | secondary text |
-| `--rule` | pale sepia | | hairlines |
-| `--stamp` | vermilion | lighter vermilion | **decisions, status, focus, the current thing**. Never decoration. |
+| `--paper` | near-white | deep navy-black | the page |
+| `--ink` | deep navy | warm off-white | text |
+| `--stamp` | cobalt | lime | **decisions, status, focus, the current thing**. Never decoration. |
+| `--pop` / `--marker` | lime highlighter under the key line | (cobalt accent) | the one expressive stroke |
+| `--panel` | cobalt | deep cobalt | the colour block diagrams and the footer sit on |
+
+Panels re-point the ordinary tokens (`.plate`, `.site-footer`), so every diagram re-colours
+without changes. Visitors can switch mode in the header; until they do, the system decides.
 
 Low-power mode drops to pure greyscale with system fonts.
 
