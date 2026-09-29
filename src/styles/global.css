@@ -1,4 +1,5 @@
 @import './tokens.css';
+@import './motion.css';
 
 @view-transition {
   navigation: auto;
@@ -14,6 +15,8 @@ html {
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
   scroll-padding-top: var(--space-8);
+  /* Entrance transforms (a stamp pressing in at scale) must never make the page scroll sideways. */
+  overflow-x: clip;
 }
 
 body {

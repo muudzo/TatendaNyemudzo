@@ -21,13 +21,18 @@ function seededOrder(count: number, seed: number): number[] {
 }
 
 const total = COLUMNS * ROWS;
-const bidders = new Set(seededOrder(total, 19032026).slice(0, BIDDERS));
-const seats = Array.from({ length: total }, (_, i) => ({
-  cx: (i % COLUMNS) * GAP + GAP / 2,
-  cy: Math.floor(i / COLUMNS) * GAP + GAP / 2,
-  bidder: bidders.has(i),
-  delay: bidders.has(i) ? [...bidders].indexOf(i) % 9 : 0,
-}));
+// In seeded order, which is also the order the cards go up when the room fills in.
+const bidders = seededOrder(total, 19032026).slice(0, BIDDERS);
+const seats = Array.from({ length: total }, (_, i) => {
+  const rank = bidders.indexOf(i);
+  return {
+    cx: (i % COLUMNS) * GAP + GAP / 2,
+    cy: Math.floor(i / COLUMNS) * GAP + GAP / 2,
+    bidder: rank >= 0,
+    rank,
+    delay: rank >= 0 ? rank % 9 : 0,
+  };
+});
 const width = COLUMNS * GAP;
 const height = ROWS * GAP;
 ---
@@ -36,7 +41,16 @@ const height = ROWS * GAP;
   {
     seats.map((seat) =>
       seat.bidder ? (
-        <circle class:list={['seat', 'seat--bidder', `d${seat.delay}`]} cx={seat.cx} cy={seat.cy} r={R} />
+        <>
+          <circle class="seat seat--taken" cx={seat.cx} cy={seat.cy} r={R - 0.5} />
+          <circle
+            class:list={['seat', 'seat--bidder', `d${seat.delay}`]}
+            cx={seat.cx}
+            cy={seat.cy}
+            r={R}
+            data-seq={seat.rank}
+          />
+        </>
       ) : (
         <circle class="seat" cx={seat.cx} cy={seat.cy} r={R - 0.5} />
       ),
@@ -75,4 +89,30 @@ const height = ROWS * GAP;
   .d6 { transition-delay: 180ms; }
   .d7 { transition-delay: 210ms; }
   .d8 { transition-delay: 240ms; }
+
+  /* Under each bidder, an ordinary seat: only drawn while the room fills in. */
+  .seat--taken {
+    visibility: hidden;
+  }
+
+  /* In view, the room starts as spectators and 45 cards go up one after another. */
+  @media screen and (prefers-reduced-motion: no-preference) {
+    :global(:root:not([data-power='off']) .plate:is(.is-pending, .is-in)) .seat--taken {
+      visibility: visible;
+    }
+
+    .seat--bidder {
+      transform-box: fill-box;
+      transform-origin: center;
+    }
+
+    :global(:root:not([data-power='off']) .plate.is-pending) .seat--bidder {
+      transform: scale(0);
+    }
+
+    :global(:root:not([data-power='off']) .plate.is-in) .seat--bidder {
+      animation: pop var(--duration-press) var(--ease-out-expo)
+        calc(var(--delay, 0ms) + var(--seq, 0) * 0.14 * var(--beat)) backwards;
+    }
+  }
 </style>

@@ -192,6 +192,43 @@ const jsonLd = {
     margin-top: var(--space-12);
   }
 
+  /*
+   * The statement's entrance, in two beats: the claim rises, then "and then I build them." lands
+   * last. Pure CSS from the first paint, so nothing waits on a script; power-cut or reduced-motion
+   * visitors get the final state. .motion-settled stops a replay when the power comes back on.
+   */
+  @media screen and (prefers-reduced-motion: no-preference) {
+    :global(:root:not([data-power='off']):not(.motion-settled)) .statement-text {
+      --rise: 0.3em;
+      animation: rise var(--duration-enter) var(--ease-out-expo) backwards;
+    }
+
+    :global(:root:not([data-power='off']):not(.motion-settled)) .statement-text em {
+      animation: appear 360ms ease-out 400ms backwards;
+    }
+
+    :global(:root:not([data-power='off']):not(.motion-settled))
+      :is(.statement-sub, .statement-proof, .statement-ledger > div) {
+      animation: rise var(--duration-enter) var(--ease-out-expo) calc(var(--step) * var(--stagger)) backwards;
+    }
+
+    .statement-sub {
+      --step: 2;
+    }
+    .statement-proof {
+      --step: 3;
+    }
+    .statement-ledger > div:nth-child(1) {
+      --step: 3;
+    }
+    .statement-ledger > div:nth-child(2) {
+      --step: 4;
+    }
+    .statement-ledger > div:nth-child(3) {
+      --step: 5;
+    }
+  }
+
   @media (min-width: 64rem) {
     .statement {
       grid-template-columns: minmax(0, 7fr) minmax(0, 4fr);

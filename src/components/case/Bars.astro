@@ -42,7 +42,7 @@ const height = rows.length * ROW_HEIGHT;
         const y = index * ROW_HEIGHT;
         const width = Math.max(2, (row.value / max) * barSpace);
         return (
-          <g class:list={['bar', { 'bar--highlight': row.highlight }]}>
+          <g class:list={['bar', { 'bar--highlight': row.highlight }]} data-seq={index}>
             <text x="0" y={y + 21} class="bar-label">{row.label}</text>
             <rect x={LABEL_WIDTH} y={y + 8} width={width} height="18" />
             <text x={LABEL_WIDTH + width + 8} y={y + 21} class="bar-value">
@@ -87,5 +87,31 @@ const height = rows.length * ROW_HEIGHT;
   .bar--highlight .bar-label,
   .bar--highlight .bar-value {
     font-weight: 650;
+  }
+
+  /* In view, each bar is measured out from the axis, then its value is written. */
+  @media screen and (prefers-reduced-motion: no-preference) {
+    .bar rect {
+      transform-box: fill-box;
+      transform-origin: left center;
+    }
+
+    :global(:root:not([data-power='off']) .plate.is-pending) .bar rect {
+      transform: scaleX(0);
+    }
+
+    :global(:root:not([data-power='off']) .plate.is-pending) .bar-value {
+      opacity: 0;
+    }
+
+    :global(:root:not([data-power='off']) .plate.is-in) .bar rect {
+      animation: rule-draw var(--duration-slow) var(--ease-out-expo)
+        calc(var(--delay, 0ms) + var(--seq) * var(--beat)) backwards;
+    }
+
+    :global(:root:not([data-power='off']) .plate.is-in) .bar-value {
+      animation: appear var(--duration-normal) ease-out calc(var(--delay, 0ms) + (var(--seq) + 3) * var(--beat))
+        backwards;
+    }
   }
 </style>

@@ -10,12 +10,16 @@ const STAGES = [
   { name: 'Super\u00ADstructure', state: 'LOCKED', kind: 'locked' },
   { name: 'Final', state: 'LOCKED', kind: 'locked' },
 ] as const;
+
+// When the gate plays, each stage takes this many beats: passes sweep left to right, Drainage's
+// status is stamped, then the next gate is tried and stays shut.
+const BEATS_PER_STAGE = 2.5;
 ---
 
 <ol class="gate">
   {
     STAGES.map((stage, index) => (
-      <li class:list={['stage', `stage--${stage.kind}`]}>
+      <li class:list={['stage', `stage--${stage.kind}`]} data-seq={index * BEATS_PER_STAGE}>
         <span class="stage-index numeral">{String(index + 1).padStart(2, '0')}</span>
         <span class="stage-name">{stage.name}</span>
         <code class="stage-state">{stage.state}</code>
@@ -108,5 +112,49 @@ const STAGES = [
     border-color: var(--ink);
     color: var(--ink);
     transition-delay: 180ms;
+  }
+
+  @media screen and (prefers-reduced-motion: no-preference) {
+    /* While the gate plays, a passed stage's ink is a layer that can sweep in behind its text. */
+    :global(:root:not([data-power='off']) .plate:is(.is-pending, .is-in)) .stage--done {
+      isolation: isolate;
+      background: var(--paper);
+    }
+
+    :global(:root:not([data-power='off']) .plate:is(.is-pending, .is-in)) .stage--done::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      z-index: -1;
+      background: var(--ink);
+    }
+
+    :global(:root:not([data-power='off']) .plate.is-pending) .stage--done::before {
+      clip-path: inset(0 100% 0 0);
+    }
+
+    :global(:root:not([data-power='off']) .plate.is-in) .stage--done::before {
+      animation: stage-pass var(--duration-rule) var(--ease-out-expo) calc(var(--delay, 0ms) + var(--seq) * var(--beat))
+        backwards;
+    }
+
+    :global(:root:not([data-power='off']) .plate.is-pending) .stage--current .stage-state {
+      opacity: 0;
+    }
+
+    :global(:root:not([data-power='off']) .plate.is-in) .stage--current .stage-state {
+      animation: press var(--duration-press) cubic-bezier(0.3, 0, 0.2, 1)
+        calc(var(--delay, 0ms) + var(--seq) * var(--beat)) backwards;
+    }
+
+    :global(:root:not([data-power='off']) .plate.is-in) .stage--current + .stage {
+      animation: rattle 380ms ease-out calc(var(--delay, 0ms) + var(--seq) * var(--beat));
+    }
+  }
+
+  @keyframes stage-pass {
+    from {
+      clip-path: inset(0 100% 0 0);
+    }
   }
 </style>

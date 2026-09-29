@@ -2,6 +2,9 @@
 /**
  * The bug Refactor 01 closed: two concurrent $600 buys against a $1,000 balance.
  * This is the exact scenario in tests/Feature/ConcurrentTradeTest.php.
+ *
+ * data-seq is the beat on which each line is written when the plate plays: the unlocked lane
+ * runs straight through to −$200, then the locked lane runs with a pause while B waits.
  */
 ---
 
@@ -9,22 +12,22 @@
   <section class="race-col race-col--before">
     <h3 class="label">Before · unlocked read</h3>
     <ol>
-      <li><span>A reads balance</span><span class="numeral">$1,000</span></li>
-      <li><span>B reads balance</span><span class="numeral">$1,000</span></li>
-      <li><span>A buys</span><span class="numeral">−$600</span></li>
-      <li><span>B buys</span><span class="numeral">−$600</span></li>
+      <li data-seq="0"><span>A reads balance</span><span class="numeral">$1,000</span></li>
+      <li data-seq="1"><span>B reads balance</span><span class="numeral">$1,000</span></li>
+      <li data-seq="2"><span>A buys</span><span class="numeral">−$600</span></li>
+      <li data-seq="3"><span>B buys</span><span class="numeral">−$600</span></li>
     </ol>
-    <p class="race-result"><span>Balance</span><span class="numeral">−$200</span></p>
+    <p class="race-result" data-seq="4.5"><span>Balance</span><span class="numeral">−$200</span></p>
   </section>
   <section class="race-col race-col--after">
     <h3 class="label">After · <code>lockForUpdate()</code></h3>
     <ol>
-      <li><span>A locks and reads</span><span class="numeral">$1,000</span></li>
-      <li><span>B waits for the lock</span><span class="numeral">…</span></li>
-      <li><span>A buys, releases</span><span class="numeral">−$600</span></li>
-      <li><span>B reads $400, rejected</span><span class="numeral">✕</span></li>
+      <li data-seq="8"><span>A locks and reads</span><span class="numeral">$1,000</span></li>
+      <li data-seq="9"><span>B waits for the lock</span><span class="numeral">…</span></li>
+      <li data-seq="12"><span>A buys, releases</span><span class="numeral">−$600</span></li>
+      <li data-seq="13"><span>B reads $400, rejected</span><span class="numeral">✕</span></li>
     </ol>
-    <p class="race-result"><span>Balance</span><span class="numeral">$400</span></p>
+    <p class="race-result" data-seq="14.5"><span>Balance</span><span class="numeral">$400</span></p>
   </section>
 </div>
 
@@ -83,13 +86,51 @@
   }
 
   .race-col--before .race-result .numeral {
+    position: relative;
     color: var(--stamp);
-    text-decoration: line-through;
-    text-decoration-thickness: 2px;
+  }
+
+  /* The strike is drawn rather than a text decoration, so it can be struck while you watch. */
+  .race-col--before .race-result .numeral::after {
+    content: '';
+    position: absolute;
+    left: -0.1em;
+    right: -0.1em;
+    top: 52%;
+    height: 2px;
+    background: currentColor;
+    transform-origin: left center;
   }
 
   :global(.work-feature:is(:hover, :focus-within)) .race-col--before {
     opacity: 0.55;
     transition: opacity var(--duration-normal) ease;
+  }
+
+  @media screen and (prefers-reduced-motion: no-preference) {
+    :global(:root:not([data-power='off']) .plate.is-pending) :is(li, .race-result) {
+      opacity: 0;
+    }
+
+    :global(:root:not([data-power='off']) .plate.is-pending) .race-col--before .race-result .numeral::after {
+      transform: scaleX(0);
+    }
+
+    :global(:root:not([data-power='off']) .plate.is-in) :is(li, .race-result) {
+      --rise: 0.35rem;
+      animation: rise var(--duration-enter) var(--ease-out-expo) calc(var(--delay, 0ms) + var(--seq) * var(--beat))
+        backwards;
+    }
+
+    /* Two beats after the balance is written, it is struck. */
+    :global(:root:not([data-power='off']) .plate.is-in) .race-col--before .race-result .numeral::after {
+      animation: rule-draw var(--duration-rule) var(--ease-out-expo)
+        calc(var(--delay, 0ms) + (var(--seq) + 2) * var(--beat)) backwards;
+    }
+
+    :global(:root:not([data-power='off']) .plate.is-in) .race-col--after .race-result .numeral {
+      animation: press var(--duration-press) cubic-bezier(0.3, 0, 0.2, 1)
+        calc(var(--delay, 0ms) + (var(--seq) + 1) * var(--beat)) backwards;
+    }
   }
 </style>

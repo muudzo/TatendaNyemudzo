@@ -1,0 +1,282 @@
+/*
+ * Motion: the ledger being written.
+ * A rule is drawn, then the entry settles under it. Stamps press. Diagrams play their system once.
+ *
+ * Every rule here sits behind three gates: the visitor hasn't asked for reduced motion, the power
+ * is on, and scripts/motion.ts has marked the element as about to enter (.is-pending → .is-in).
+ * Take away any gate and the element is simply in its final state. Diagram choreography lives
+ * with each diagram; the vocabulary it uses is defined here.
+ */
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(var(--rise));
+  }
+}
+
+@keyframes rule-draw {
+  from {
+    transform: scaleX(0);
+  }
+}
+
+@keyframes appear {
+  from {
+    opacity: 0;
+  }
+}
+
+/* A rubber stamp: comes down large and tilted, squashes, settles at its resting angle. */
+@keyframes stamp-press {
+  0% {
+    opacity: 0;
+    transform: scale(1.8) rotate(-9deg);
+  }
+  55% {
+    opacity: 1;
+    transform: scale(0.94) rotate(-0.5deg);
+  }
+  78% {
+    transform: scale(1.03) rotate(-1.8deg);
+  }
+}
+
+/* The same press without the tilt, for status text inside a diagram. */
+@keyframes press {
+  0% {
+    opacity: 0;
+    transform: scale(1.6);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(0.96);
+  }
+}
+
+/* The ink that squeezes out around a stamp as it lands. */
+@keyframes stamp-ink {
+  from {
+    opacity: 0.55;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(1.35, 1.8);
+  }
+}
+
+@keyframes pop {
+  0% {
+    transform: scale(0);
+  }
+  60% {
+    transform: scale(1.4);
+  }
+}
+
+/* A locked gate being tried: it rattles, and stays shut. */
+@keyframes rattle {
+  20% {
+    transform: translateX(-3px);
+  }
+  45% {
+    transform: translateX(3px);
+  }
+  70% {
+    transform: translateX(-1.5px);
+  }
+  90% {
+    transform: translateX(0.5px);
+  }
+}
+
+/* The lamp comes back on the way a tube light does after load-shedding. */
+@keyframes lamp-flicker {
+  0%,
+  18%,
+  34% {
+    opacity: 0.15;
+  }
+  10%,
+  26% {
+    opacity: 0.9;
+  }
+  46% {
+    opacity: 0.4;
+  }
+}
+
+@media screen and (prefers-reduced-motion: no-preference) {
+  /* ——— Rules: drawn from the left, over the border they replace ——— */
+
+  :root:not([data-power='off']) :is(.prose h2, .plate):is(.is-pending, .is-in),
+  :root:not([data-power='off'])
+    :is(.work-feature, .work-row):not(.section-head + *):is(.is-pending, .is-in) {
+    position: relative;
+    border-top-color: transparent;
+  }
+
+  :root:not([data-power='off']) .section-head:is(.is-pending, .is-in) {
+    position: relative;
+    border-bottom-color: transparent;
+  }
+
+  :root:not([data-power='off']) :is(.section-head, .prose h2, .plate):is(.is-pending, .is-in)::after,
+  :root:not([data-power='off'])
+    :is(.work-feature, .work-row):not(.section-head + *):is(.is-pending, .is-in)::after {
+    content: '';
+    position: absolute;
+    top: -1px;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: var(--ink);
+    transform-origin: left center;
+    pointer-events: none;
+  }
+
+  :root:not([data-power='off']) :is(.section-head, .prose h2, .plate, .work-feature, .work-row).is-pending::after {
+    transform: scaleX(0);
+  }
+
+  :root:not([data-power='off']) :is(.section-head, .prose h2, .plate, .work-feature, .work-row).is-in::after {
+    animation: rule-draw var(--duration-rule) var(--ease-out-expo) var(--delay, 0ms) backwards;
+  }
+
+  :root:not([data-power='off']) .section-head:is(.is-pending, .is-in)::after {
+    top: auto;
+    bottom: -1px;
+  }
+
+  :root:not([data-power='off']) .work-row:is(.is-pending, .is-in)::after {
+    background: var(--rule);
+  }
+
+  /* ——— Entries: settle under their rule, a beat behind it ——— */
+
+  :root:not([data-power='off'])
+    :is(
+      .section-head > *,
+      .prose h2,
+      .work-feature :is(.feature-numeral, .feature-head, .feature-claim, .feature-facts, .feature-read),
+      .work-row :is(.row-year, .row-main, .row-claim),
+      .principles > li,
+      .path > li
+    ):is(.is-pending, .is-pending *) {
+    opacity: 0;
+  }
+
+  :root:not([data-power='off']) .is-in:is(.section-head, .work-row) > *,
+  :root:not([data-power='off']) .is-in:is(.prose h2, .principles > li, .path > li) {
+    animation: rise var(--duration-enter) var(--ease-out-expo) calc(var(--delay, 0ms) + var(--stagger))
+      backwards;
+  }
+
+  /* A feature is read top to bottom: numeral, title, claim, facts, then the way in. */
+  :root:not([data-power='off']) .work-feature.is-in :is(.feature-numeral, .feature-head, .feature-claim, .feature-facts, .feature-read) {
+    animation: rise var(--duration-enter) var(--ease-out-expo) calc(var(--delay, 0ms) + var(--step) * var(--stagger))
+      backwards;
+  }
+
+  .work-feature .feature-numeral {
+    --step: 1;
+  }
+  .work-feature .feature-head {
+    --step: 2;
+  }
+  .work-feature .feature-claim {
+    --step: 3;
+  }
+  .work-feature .feature-facts {
+    --step: 4;
+  }
+  .work-feature .feature-read {
+    --step: 5;
+  }
+
+  /* Margin notes come out of the paragraph they annotate. */
+  :root:not([data-power='off']) .note.is-pending {
+    opacity: 0;
+  }
+
+  :root:not([data-power='off']) .note.is-in {
+    animation: note-in var(--duration-enter) var(--ease-out-expo) calc(var(--delay, 0ms) + 2 * var(--stagger))
+      backwards;
+  }
+
+  @keyframes note-in {
+    from {
+      opacity: 0;
+      transform: translate(var(--note-from-x, 0), var(--note-from-y, var(--rise)));
+    }
+  }
+
+  @media (min-width: 72rem) {
+    .note {
+      --note-from-x: -1rem;
+      --note-from-y: 0;
+    }
+  }
+
+  /* ——— Stamps: pressed onto the page ——— */
+
+  :root:not([data-power='off']) .stamp:is(.is-pending, .is-in) {
+    position: relative;
+  }
+
+  :root:not([data-power='off']) .stamp.is-pending {
+    opacity: 0;
+  }
+
+  :root:not([data-power='off']) .stamp.is-in {
+    animation: stamp-press var(--duration-press) cubic-bezier(0.3, 0, 0.2, 1) var(--delay, 0ms) backwards;
+  }
+
+  :root:not([data-power='off']) .stamp.is-in::after {
+    content: '';
+    position: absolute;
+    inset: -1.5px;
+    border: 1.5px solid var(--stamp);
+    border-radius: var(--radius);
+    opacity: 0;
+    transform: none;
+    pointer-events: none;
+    animation: stamp-ink var(--duration-press) var(--ease-out-expo) calc(var(--delay, 0ms) + 0.5 * var(--duration-press))
+      backwards;
+  }
+
+  /* ——— The primitives matrix fills in, one shared habit at a time ——— */
+
+  :root:not([data-power='off']) .matrix-table.is-pending td.used .dot {
+    transform: scale(0);
+  }
+
+  :root:not([data-power='off']) .matrix-table.is-in td.used .dot {
+    animation: pop var(--duration-press) var(--ease-out-expo) calc(var(--delay, 0ms) + var(--seq, 0) * 0.3 * var(--beat))
+      backwards;
+  }
+
+  /* ——— The power lamp, when the power comes back ——— */
+
+  :root.power-returning:not([data-power='off']) .power-lamp {
+    animation: lamp-flicker 640ms steps(1, end) 120ms backwards;
+  }
+}
+
+/* ——— Page to page: the title carries over (scripts/morph.ts) ——— */
+
+@media (prefers-reduced-motion: no-preference) {
+  ::view-transition-group(case-title) {
+    animation-duration: 560ms;
+    animation-timing-function: var(--ease-out-expo);
+  }
+}
+
+/* With the power off, pages change instantly. The cut itself still browns out. */
+:root[data-power='off']:not(.power-cutting)::view-transition-group(*),
+:root[data-power='off']:not(.power-cutting)::view-transition-old(*),
+:root[data-power='off']:not(.power-cutting)::view-transition-new(*) {
+  animation: none;
+}
+
