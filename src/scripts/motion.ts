@@ -101,6 +101,25 @@ function settle(): void {
   }
 }
 
+/**
+ * At the end of the page there's no scroll left to carry an element past its reveal line, so once
+ * the footer is in view, anything still waiting on screen enters.
+ */
+function revealAtPageEnd(): void {
+  const footer = document.querySelector('.site-footer');
+  if (!footer) return;
+  const observer = new IntersectionObserver((entries) => {
+    if (!entries.some((entry) => entry.isIntersecting)) return;
+    for (const element of document.querySelectorAll<HTMLElement>(`.${PENDING}`)) {
+      if (!isOnScreen(element)) continue;
+      observers.forEach((watcher) => watcher.unobserve(element));
+      enter(element, 0);
+    }
+  });
+  observer.observe(footer);
+  observers = [...observers, observer];
+}
+
 function arm(): void {
   const painted = hasPainted();
   // Read every position first, then write, so the page is laid out once.
@@ -111,6 +130,7 @@ function arm(): void {
   for (const { entrance, targets } of plans) {
     if (targets.length) watch(entrance, targets);
   }
+  revealAtPageEnd();
 }
 
 function onPowerChange(): void {

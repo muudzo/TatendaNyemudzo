@@ -27,117 +27,61 @@ import SignaturePlate from '../../components/diagrams/SignaturePlate.astro';
 
 ## Context
 
-In Zimbabwe, cattle are a savings account. People store and move value in livestock when they
-don't trust the currency, and they buy and sell it at physical auctions: one place, one day a
-week, a room full of dealers.
-
-Paynow, the country's largest payment gateway, gave me a six-week internship with two jobs:
-build a working livestock auction marketplace, and use it to measure how Paynow's developer
-experience compares with regional and international payment providers.
+In Zimbabwe, cattle are a savings account, traded at physical auctions: one place, one day a week.
+Paynow, the country's largest payment gateway, gave me six weeks to build a livestock marketplace
+and use it to benchmark Paynow's developer experience against its competitors.
 
 ## Problem
 
-Online livestock trade already exists, on Facebook Marketplace and WhatsApp groups. It's cheap
-and it's risky: no escrow, no verification, a high no-show rate. The auction house is the
-opposite: trustworthy, and expensive in ways you only see from the inside.
-
-So the question was never "can we put an auction online?" It was: **what does the auction
-house actually sell, and can a phone provide it for less?**
+Online livestock trade already happens on Facebook and WhatsApp. It's cheap, and it has no escrow,
+no verification and plenty of no-shows. The auction house is trustworthy but expensive. The real
+question: **what does the auction house actually sell, and can a phone provide it for less?**
 
 ## Thinking
 
-Before designing anything I attended two physical auctions, on 19 and 25 March. My notes from the
-first visit became the product's foundation.
+I went to two auctions before designing anything.
 
 <Note kind="evidence">
-  Every buyer pays a **US$1,000 deposit** before they can bid. Average monthly income is around
-  US$200–300.
+  A **US$1,000 deposit** to bid, where average monthly income is around US$200–300. And a **12%
+  house fee** on every sale.
 </Note>
 
-The first thing I saw was the gate. A US$1,000 deposit keeps out unserious bidders, and it also
-keeps out every smallholder who wants one goat for US$80.
-
-The second was the fee. The house takes 5% from the seller and 7% from the buyer: **12% of every
-sale**, before transport and police clearance.
-
-| On a US$1,200 sale | Fee | Amount |
-|---|---|---|
-| Seller | 5% | −US$60 |
-| Buyer | 7% | +US$84 |
-| **House** | **12%** | **US$144** |
-
-The third was speed. The auctioneer talks fast on purpose, because urgency pushes prices up. The
-fourth was who *wasn't* there on a Wednesday: anyone with a job, rural smallholders outside the
-catchment, the diaspora buying for family at home. That became the wedge.
+The deposit keeps out every smallholder who wants one goat. The room is full on a Wednesday, so
+anyone with a job, anyone rural and the diaspora are all missing. That became the wedge.
 
 <SignaturePlate slug="zimlivestock" />
 
-The last observation turned into the product's most useful number. The highest bid card I saw was
-**45**, in a room of roughly 200. Most people were watching, not bidding. A marketplace doesn't
-have to fill a room. It needs about 45 serious bidders per listing. My second visit turned this
-into a metric, *Active Bidders per Listing*, which is the leading indicator of whether an
-auction is economically viable.
+The highest bid card was **45**, in a room of about 200. A marketplace doesn't need the room. It
+needs about 45 serious bidders per listing.
 
 <Note kind="decision">
   Don't compete with Facebook on price. Offer **auction-level trust at half the fee**.
 </Note>
 
-Facebook prices are lower because Facebook carries the risk. Matching them would mean giving up
-the only thing that makes the auction house worth 12%.
-
-<Note kind="rejected">
-  Building a logistics service. Two independent truckers at the auction were already cold-calling
-  farmers. Start by introducing them manually over WhatsApp; no code until demand is proven.
-</Note>
-
-Transport and police clearance are both real pain points. I deliberately didn't solve either at
-launch. Clearance stays physical, as the law requires; the listing asks for a photo of the stock
-card and brand mark so the buyer knows what to expect.
-
 ## Design
-
-I mapped everything the auction house provides to its digital equivalent, including the
-uncomfortable parts:
 
 | The auction house | ZimLivestock |
 |---|---|
-| US$1,000 deposit | US$50–100 refundable escrow via Paynow |
-| 12% total fees | 5–6% total, shown line by line at checkout |
-| Physical inspection | Video listings, stock-card photos, seller history |
-| A room full of people | "People watching" counts and live bid updates |
-| Fast auctioneer | A 90-second countdown that matches the room's cadence |
+| US$1,000 deposit | US$50–100 refundable escrow |
+| 12% in fees | 5–6%, shown line by line at checkout |
+| Physical inspection | Video, stock-card photos, seller history |
+| A full room | Live bids and a "people watching" count |
 | Wednesday, one place | Any day, anywhere with a phone |
-
-The 90-second countdown is a compromise. Asynchronous bidding gives buyers time to think, which
-probably means lower final prices. That's good for buyers and a harder sell to sellers. I wrote that
-down rather than hiding it: sellers may get slightly less per animal but keep more after fees.
-
-I designed 12 interactive wireframes and a system-flow diagram before building the flow from
-listing to bid to win to payment.
 
 ## Build
 
-The stack is a React 18 PWA on Supabase: Postgres with row-level security, Realtime for live
-bids, and 18+ Deno edge functions for payments, agents and QA.
+A React PWA on Supabase. The parts that matter are invisible:
 
-The parts I care about most are the ones nobody sees:
+- **Bids have one door**: a database function that locks the listing and checks every rule.
+- **Exactly once**: idempotency keys on bids and payments, so a double-tap never pays twice.
+- **Production polices itself**: every merge runs security, consistency and chaos tests against
+  the live app.
 
-- **Bids go through one door.** A `place_bid` database function locks the listing's row and
-  checks every rule (amount, reserve, status, end time, no self-bidding) before inserting. There
-  is no other way to create a bid.
-- **Exactly once.** Bids and payments carry `crypto.randomUUID()` idempotency keys, enforced by
-  partial unique indexes. A double-tap on a slow connection can't bid or pay twice.
-- **Payments fall back.** An orchestrator retries in order: EcoCash, then OneMoney, then card.
-  A settlement ledger records what actually cleared.
-- **Production polices itself.** Every merge to `main` runs a consistency checker, a security
-  agent and a chaos test *against production*. Any hard failure turns CI red, with no override.
-
-To benchmark providers honestly, I integrated all five into the same codebase rather than
-comparing documentation. Each has its own checkout function wired through the same payment path.
+To benchmark fairly, I integrated all five payment providers into the same checkout.
 
 <Bars
   label="Benchmark · lines of integration code"
-  caption="Same app, same checkout, five providers. Paynow needed 60% more code than the leanest integration, mostly for manual SHA-512 hashing with undocumented field order."
+  caption="Same app, same checkout. Paynow needed 60% more code than the leanest integration."
   unit="lines"
   rows={[
     { label: 'Flutterwave', value: 523, display: '~523' },
@@ -150,62 +94,28 @@ comparing documentation. Each has its own checkout function wired through the sa
 
 ## Iteration
 
-Four changes came straight from the field notes:
+On 13 April, the production checks found that **anyone could win any auction for $1**: a loose
+database policy let users write bids directly and skip the rules. I closed it the same day, along
+with two other severity-1 issues.
 
-| What I saw | What changed |
-|---|---|
-| A US$1,000 deposit prices most buyers out | Escrow holds of US$50–100 (schema ready) |
-| Hidden 12% fees erode trust | A line-by-line fee breakdown at checkout |
-| Buyers don't trust a listing without proof | Stock-card photo upload in the seller flow |
-| Sellers want a trust signal | Payment-history trust badges |
+<Note kind="evidence">`bf3da08` · `921bc62` · `4cd7109`</Note>
 
-The more important iteration came from the QA gate. On 13 April the post-deploy audit found three
-severity-1 problems, all fixed the same day:
-
-<Note kind="evidence">
-  `bf3da08` · `921bc62` · `4cd7109`. Each fix is its own commit, linked from the audit report.
-</Note>
-
-1. **Anyone could win any auction for $1.** A permissive insert policy let an authenticated user
-   write straight to the bids table, skipping `place_bid`. I removed it; bids now have one door.
-2. **CORS fell back to `*`.** Seven edge functions used `|| "*"` when an environment variable
-   was missing. Now they fail closed.
-3. **Search was broken past the first page.** It filtered on the client, page by page. It moved
-   to the server.
-
-The first one is why I build the gate before the features. My own tests had passed. The system
-that attacked production is what caught it.
+My own tests had passed. The system attacking production is what caught it.
 
 ## Result
 
-- **A working marketplace in production**: list, bid, win, pay, installable as a PWA.
-- **A ranked developer-experience report** across five providers, with seven recommendations.
-  Stripe scored 9.7/10, Paystack 8.0, Flutterwave 7.2, Paynow 4.2, and Pesepay 3.8 (blocked by
-  malformed HTTP headers).
-- **The most valuable finding was the blocker itself.** Paynow's API sits behind Cloudflare bot
-  protection on its main domain, so *no server-side code can call it*: no edge function, no
-  Lambda, not even `curl`. Browsers pass the challenge; servers can't. Until that changes, Paynow
-  can't be used from modern cloud architectures.
-- A second comparison found that two of Paynow's own sibling products, BillPay and TXT, already
-  use the fixes Paynow Core needs: a separate API subdomain, Basic Auth, documented test
-  prefixes. The fix wasn't research. It was adopting patterns the company already had.
+- A live marketplace: list, bid, win, pay.
+- A ranked developer-experience report with seven recommendations. Stripe scored 9.7/10, Paynow 4.2.
+- The key finding: Paynow's API sits behind bot protection that blocks **all** server-side calls.
+  Until that changes, it can't be used from modern cloud apps.
 
 <Note kind="open">
-  At handover, 12 of 15 success criteria were green. Live Paynow payments were blocked by
-  Cloudflare, user feedback was about 30% collected, and the stakeholder demos were still
-  scheduled.
+  12 of 15 success criteria green at handover. Live payments blocked, user feedback about 30%
+  collected.
 </Note>
 
 ## Reflection
 
-The field visits were worth more than any feature. One Wednesday in an auction room gave me
-the deposit, the fee, the wedge and the liquidity target. I would have designed a different, and
-worse, product from a desk.
-
-What I'd change: I built the engineering safety net early and the user-feedback loop late. The
-QA gate caught a bug that would have lost real money. But by the end I'd heard from more
-automated agents than farmers. Next time, the first stakeholder session happens in the same week
+One visit to an auction gave me the deposit, the fee, the wedge and the target. I built the
+safety net early and user feedback late. Next time, the first user session happens the same week
 as the first deploy.
-
-What it says about how I work: I like finding the one rule a system can enforce ("bids have one
-door", "fees are always shown") and then making it impossible to break rather than unlikely.

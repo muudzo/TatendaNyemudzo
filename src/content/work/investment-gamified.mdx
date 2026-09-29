@@ -14,7 +14,6 @@ primitives: [idempotency, audit-log, honest-scope]
 facts:
   - { value: '7', label: 'concurrency tests guarding every trade' }
   - { value: '2', label: 'structured refactors, each with a written review' }
-  - { value: '5 min', label: 'price staleness accepted, on purpose' }
 links:
   - { label: 'Repository', href: 'https://github.com/muudzo/investment-gamified' }
   - { label: 'ZSE data scraper', href: 'https://github.com/muudzo/zse-data-scrapper' }
@@ -25,99 +24,56 @@ import SignaturePlate from '../../components/diagrams/SignaturePlate.astro';
 
 ## Context
 
-Most Zimbabweans have never bought a share. The Zimbabwe Stock Exchange and the Victoria Falls
-Stock Exchange exist, but broker minimums, jargon, and a deep distrust of formal finance left
-over from the 2008 hyperinflation keep them out. Savings go into land, livestock, US dollars and
-informal savings clubs instead.
+Most Zimbabweans have never bought a share. Broker minimums, jargon and distrust left over from
+the 2008 hyperinflation keep them out of the stock exchange.
 
 ## Problem
 
-You can't learn to invest by reading about dividends. You learn by deciding, being wrong and
-trying again, and for most people being wrong with real money is not an option.
-
-The design problem was to **keep the psychology of gain and loss while removing the risk**.
+You learn to invest by deciding and being wrong, and most people can't afford to be wrong with
+real money. The design problem: **keep the feeling of gain and loss, remove the risk.**
 
 ## Thinking
 
-Paper trading was the obvious mechanism. The less obvious question was who the platform is for.
-I wrote a market report that set out the tiers: secondary-school students before they earn,
-university students in finance and commerce, and young professionals before their first real
-investment.
+Paper trading for students and first-time investors, on cheap phones and metered data. So the
+frontend stays light and installable.
 
 <Note kind="decision">
-  Game mechanics (XP, levels, leaderboards) are there to turn "intimidating" into "progress". They
-  are not there to make trading addictive.
+  Game mechanics are there to turn "intimidating" into "progress", not to make trading addictive.
 </Note>
-
-That audience set the technical constraints: cheap phones, metered data, patchy connections. So
-the frontend had to stay light, and it's built as a PWA.
 
 ## Design
 
-Every trade earns experience: +10 for a buy, +15 for a sell, so learning to take profit is
-rewarded. Crossing an XP threshold levels you up. Leaderboards turn practice into something
-social, so a class or a campus can compete.
-
-Real prices matter: a game with invented numbers teaches nothing about the actual market. Prices
-come from live market APIs, with a cached fallback. Alongside the platform I wrote a scraper for
-Zimbabwe Stock Exchange data, so the game can use local listings rather than only international
-tickers.
+Every trade earns experience (+10 for a buy, +15 for a sell, so taking profit is rewarded), with
+levels and leaderboards so a class can compete. Prices are real, because a game with invented
+numbers teaches nothing.
 
 ## Build
 
-A Laravel MVC application: authentication, virtual wallets and portfolios in MySQL through
-Eloquent, and a thin controller layer over services such as `PortfolioService`, which holds the
-trading logic.
-
-It worked. Then I read it the way an attacker, or just a busy server, would.
+A Laravel application with virtual wallets and portfolios in MySQL. It worked. Then I read it the
+way a busy server would.
 
 ## Iteration
 
 <SignaturePlate slug="investment-gamified" />
 
-The first version read a user's balance, checked it, and wrote the trade. Two requests arriving
-together could both read the same balance and both succeed. Balances could go negative, stock
-could be sold twice, and a user could double-spend.
+Two requests arriving together could both read the same balance and both succeed, so a balance
+could go negative. It's play money, but the same bug in a real wallet is a real loss.
 
-It's play money, so nobody lost anything. But the same bug in a real wallet is a real loss, and I
-wanted to learn to build things that hold under load, not just under a demo.
-
-**Refactor 01: pessimistic locking.** `buyStock()` and `sellStock()` now lock the user and
-portfolio rows (`lockForUpdate()`) and run every balance and quantity check on the locked data.
-Seven tests simulate the race directly: two $600 buys against $1,000, two 8-share sells against
-10 shares, a buy and a sell that must serialise correctly, and checks that average price, the
-transaction record and XP are awarded exactly once.
-
-**Refactor 02: audit ledger.** Portfolio changes write to an append-only audit table, so every
-balance can be traced back to the trades that produced it.
-
-**Refinement 01: non-goals.** I then wrote down what I would *not* build yet, and why:
+I fixed it with **row locks**, and wrote seven tests that recreate the race directly. Then I added
+an append-only audit table, and wrote down what I deliberately *wouldn't* build yet, and why.
 
 <Note kind="rejected">
-  Event sourcing and CQRS. The append-only audit table already records deltas, and replaying events
-  only pays off at a scale this doesn't have.
+  Event sourcing. The audit table already records every change, and the extra machinery only pays
+  off at a scale this doesn't have.
 </Note>
-
-| Not built | Why not yet | When to revisit |
-|---|---|---|
-| Event sourcing / CQRS | Audit table is enough for one region | If compliance needs point-in-time state |
-| Background price jobs | 5-minute-old prices are fine for a learning game; a circuit breaker falls back to cache | If sub-minute freshness becomes a requirement |
-| Table partitioning | Only pays off at ~100M rows | When the audit table passes ~5 GB |
 
 ## Result
 
-A working paper-trading platform with a trade path that stays correct under concurrent load,
-proven by tests rather than hope, and a written record of what it deliberately doesn't do.
+A paper-trading platform whose trades stay correct under concurrent load, proven by tests.
 
-<Note kind="open">
-  It hasn't been tested with students in a classroom yet. That's the test that matters.
-</Note>
+<Note kind="open">Not yet tested with students in a classroom.</Note>
 
 ## Reflection
 
-This is where the habit you'll see across all my later work comes from. After this project, every
-system I build asks one question first: *what happens if this runs twice at the same time?*
-ZimLivestock's `place_bid` function and Vaka's atomic stage gates both answer it.
-
-Writing the non-goals document taught me as much as the refactors did. Knowing what not to build
-is a design skill, and saying so in writing stops the work from sliding into over-engineering.
+Every system I've built since asks one question first: *what if this runs twice at the same
+time?* Knowing what not to build turned out to be a design skill too.

@@ -24,38 +24,26 @@ import Note from '../../components/case/Note.astro';
 
 ## Context
 
-People who report land-rights abuses in Zimbabwe are often watched. The people they report on can
-compel data from hosting providers, seize devices, and watch network traffic. The app is for
-citizens, activists and NGOs organising around illegal land deals.
+A reporting app for people exposing illegal land deals in Zimbabwe. They are often watched, and
+their devices can be seized.
 
 ## Decisions
 
-I started with a threat model rather than a feature list: who the adversaries are, what they can
-do, and, just as important, **what this app cannot protect against**.
+I started with a threat model, including **what the app cannot protect against**.
 
 <Note kind="decision">
-  The UI is forbidden from saying "military-grade encryption". The allowed wording is written
-  down: *"Reports are encrypted in your browser with AES-GCM-256 before sending."*
+  The UI may not say "military-grade encryption". The allowed wording is written down, because
+  someone who overestimates their protection takes risks they shouldn't.
 </Note>
-
-Honest copy is a safety feature. Someone who overestimates their protection takes risks they
-wouldn't otherwise take. The residual risks are listed for users too: network timing, a
-compromised device, photo metadata, legal compulsion.
 
 ## Build
 
-- **Real cryptography.** The first version had "simulated AES". I replaced it with WebCrypto
-  AES-GCM-256 using PBKDF2 (250,000 iterations).
-- **Exactly-once reporting.** Submissions carry idempotency keys, retry with a circuit breaker, and
-  queue offline, so a flaky connection never loses a report or sends it twice.
-- **Emergency wipe.** One control clears local storage, IndexedDB, caches and the service worker.
-- **Nothing sensitive cached.** The service worker never caches `/api/`, and the error boundary
-  never logs report contents.
-- **A small bundle.** A 300 KB gzip budget is enforced in CI, because on metered data size
-  decides who can use the app at all.
+- Reports are encrypted in the browser (AES-GCM-256) before sending.
+- Submissions queue offline and are sent exactly once, however flaky the network.
+- One control wipes everything the app stored on the device.
+- A 300 KB size budget enforced in CI, because on metered data, size decides who can use it.
 
 ## Where it stands
 
-Live as a PWA with CI security scanning (CodeQL, npm audit, gitleaks). The biggest open item is
-removing photo metadata on the device before upload, because EXIF data can identify a reporter
-even when everything else is anonymous.
+Live, with security scanning in CI. Next: stripping photo metadata on the device, since it can
+identify a reporter.
